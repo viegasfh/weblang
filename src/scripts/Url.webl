@@ -1,0 +1,71 @@
+// Url manipulation module
+
+import
+	Str;
+
+export var
+	// Url_Split(url: string): object
+	Split = Native("weblx.url.SplitFun"),
+
+	// Url_Glue(obj: object): string
+	Glue = Native("weblx.url.GlueFun"),
+
+    // Url_Encode(s: string): string		string 2 x-www-form-urlencoded
+    Encode = Native("weblx.url.EncodeFun"),
+
+    // Url_Decode(s: string): string		x-www-form-urlencoded 2 string
+    Decode = Native("weblx.url.DecodeFun"),
+
+	// Url_Resolve(baseurl: string, relurl: string): string
+	Resolve = Native("weblx.url.ResolveFun");
+
+
+export var
+	SplitQuery = fun(querystr)
+		var obj = [. .];
+		if querystr[0] == '?' then
+			querystr = Select(querystr, 1, Size(querystr))
+		end;
+		every q in Str_Split(querystr, "&") do
+			var av = Str_Split(q, "=");
+			if Size(av) == 1 or Size(av) == 2 then
+				var A = Decode(av[0]);
+				var V = Decode(av[1]) ? "";
+				
+				// if field A in obj is already defined,
+				// append to it; otherwise, set it
+				if A member obj then
+					if Listp(obj[A]) then
+						obj[A] = obj[A] + [V];
+					else
+						obj[A] := [obj[A]] + [V];
+					end;
+				else
+					obj[A] := V;
+				end; // catch				
+			end;
+		end;
+		obj
+	end;
+
+export var
+	GlueQuery = fun(obj)
+		var s = "";
+		every a in obj do
+			var paramName = Encode(ToString(a));
+			if Listp(obj[a]) then
+				every elem in obj[a] do
+					if s != "" then
+						s = s + '&';
+					end;
+					s = s + paramName + '=' + Encode(ToString(elem));
+				end;
+			else		
+				if s != "" then
+					s = s + '&';
+				end;
+				s = s + paramName + '=' + Encode(ToString(obj[a]));
+			end;		
+		end;
+		s
+	end;

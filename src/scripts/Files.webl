@@ -1,0 +1,18 @@
+export var
+    Exists = Native("weblx.files.ExistsFun"),
+    LoadFromFile = Native("weblx.files.LoadFromFileFun"),
+    LoadStringFromFile = Native("weblx.files.LoadStringFromFileFun"),
+    SaveToFile = Native("weblx.files.SaveToFileFun"),
+    GetURL = Native("weblx.files.GetURLFun"),
+    PostURL = Native("weblx.files.PostURLFun"),
+    Eval = Native("weblx.files.EvalFileFun"),
+    List = Native("weblx.files.ListFun"),		// Files_List(dirname: string): list
+    Mkdir = Native("weblx.files.MkdirFun"),		// Files_Mkdir(dirname: string): bool
+    IsFile = Native("weblx.files.IsFileFun"),	// Files_IsFile(name: string): bool
+    IsDir = Native("weblx.files.IsDirFun"),		// Files_IsDir(dirname: string): bool
+    Delete = Native("weblx.files.DeleteFun"),	// Files_Delete(name: string): bool
+    Size = Native("weblx.files.SizeFun"),       // Files_Size(name: string): int
+    
+    // Files_AppendToFile(filename: string, data: string):nil
+    // Files_AppendToFile(filename: string, data: string, encoding: string):nil
+    AppendToFile = Native("weblx.files.AppendToFileFun");

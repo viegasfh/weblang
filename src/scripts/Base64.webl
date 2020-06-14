@@ -1,0 +1,69 @@
+
+// base64 character set
+var cset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+export var Encode = fun (s)
+    var r = "";
+    var i = 0;
+
+    var getc = fun ()
+        i = i + 1;
+        if i <= Size(s) then ToInt(s[i-1]) else 0 end
+    end;
+
+    var putc = fun (c)
+        r = r + cset[c mod 64]
+    end;
+
+    while i < Size(s) do
+	var v = 0;
+        v = v*256 + getc();
+        v = v*256 + getc();
+        v = v*256 + getc();
+
+        if i == Size(s)+2 then
+            putc(v div (64*64*64));
+            putc(v div (   64*64));
+	    r = r + '=';
+	    r = r + '=';
+            nil
+        elsif i == Size(s)+1 then
+            putc(v div (64*64*64));
+            putc(v div (   64*64));
+            putc(v div (      64));
+	    r = r + '=';
+            nil
+        else
+            putc(v div (64*64*64));
+            putc(v div (   64*64));
+            putc(v div (      64));
+            putc(v               );
+            nil
+        end
+    end;
+    r
+end;
+
+var Decode = fun (s)
+    var r = "";
+    var v = 0;
+    var b = 1;
+    var i = 0;
+    while i < Size(s) and s[i] != '=' do
+        var c = s[i];
+        i = i + 1;
+        var j = Size(cset)-1;
+        while j >= 0 and cset[j] != c do j = j - 1 end;
+        if j >= 0 then
+            v = v*64 + j;
+            b = b*64;
+            if b >= 256 then
+                b = b div 256;
+                r = r + ToChar(v div b);
+                v = v mod b
+            end
+	end
+    end;
+    r
+end
+

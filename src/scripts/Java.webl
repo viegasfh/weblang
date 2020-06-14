@@ -1,0 +1,40 @@
+// Module Java
+
+// Functions to directly access Java classes and objects.
+
+/*
+Java_New(classname: string, ...): object
+Allocate a Java object, calling the appropriate conctructor as determined by the optional
+arguments.
+*/
+export var New = Native("weblx.java.NewFun");
+
+/*
+Java_New(classname: string): object
+Maps the Java class to a WebL object, so that static members of the class can be accessed.
+*/
+export var Class = Native("weblx.java.ClassFun");
+
+/*
+Java_NewArray(classname: string, size: int): array
+Allocates a Java array of the specified type and size.
+*/
+export var NewArray = Native("weblx.java.NewArrayFun");
+
+/*
+Java_Get(A: array, i: int): any
+Retrieves the element at index i of A.
+*/
+export var Get = Native("weblx.java.GetFun");
+
+/*
+Java_Set(A: array, i: int, v: any): any
+Set the index i of A to v.
+*/
+export var Set = Native("weblx.java.SetFun");
+
+/*
+Java_Length(A: array): int
+Returns the length of the array A.
+*/
+export var Length = Native("weblx.java.LengthFun");

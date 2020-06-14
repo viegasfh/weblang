@@ -1,0 +1,4 @@
+export var
+    Start = Native("weblx.webserver.StartFun"),
+    Stop = Native("weblx.webserver.StopFun"),
+    Publish = Native("weblx.webserver.PublishFun");

@@ -1,0 +1,4 @@
+
+export var
+    Save = Native("weblx.cookies.SaveFun"),
+    Load = Native("weblx.cookies.LoadFun");

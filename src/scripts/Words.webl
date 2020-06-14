@@ -1,0 +1,121 @@
+// Module Words
+
+import Str;
+
+// calculate the words on a page taking into account all the possible
+// word breaks that can occur in html.
+export var Words = fun(page)
+	var P = Para(page, "- tt i b u s strike big small em string
+ 			dfn code samp kbd var cite acronym a img applet
+			object font basefont script map q sub sup span
+			bdo iframe input select textarea label button");
+	var R = NewPieceSet(page);
+	every p in P do
+		R = R + Pat(p, `\w*`);
+	end;
+	R
+end;
+
+// Adds the words occuring in page to the word frequencies already
+// stored in the freq object.
+export var
+AddWordFreqs = fun(page, freq)
+  var words = Words(page);
+  var word;
+  every word in words do
+    var txt = Str_ToLowerCase(Text(word));
+    var f = (freq[txt] ? 0);
+    freq[txt] := f + 1;
+  end
+end;
+
+// Calculates the word frequencies in the page, returning a word frequency
+// objects where field names are the word strings, and the field values are
+// the number of times that word occurred in the page.
+export var
+WordFreqs = fun(page)
+    var freq = [..];
+    AddWordFreqs(page, freq);
+    freq
+end;
+
+// List of common English words.
+export var Common =
+{"among", "nor", "particular", "", "not", "can", "html", "now",
+"ask", "nevertheless", "let", "nd", "above", "nbsp", "we'd", "keeps",
+"after", "outside", "afterwards", "try", "no", "saying", "useful", "needs",
+"whereby", "with", "almost", "doing", "hereupon", "seeming", "containing", "whole",
+"truly", "just", "itself", "what", "nine", "of", "oh", "ok",
+"latter", "yours", "on", "right", "noone", "or", "against", "really",
+"where", "this", "indicated", "ones", "said", "before", "program", "sat",
+"a", "saw", "b", "whence", "indicates", "c", "say", "d",
+"e", "f", "how", "g", "sensible", "h", "even", "i",
+"other", "into", "j", "k", "l", "m", "ever", "n",
+"tue", "don't", "o", "few", "p", "between", "q", "r",
+"s", "t", "u", "formerly", "v", "w", "x", "y",
+"asking", "z", "around", "inward", "unto", "throughout", "we're", "does",
+"while", "example", "shouldn't", "qv", "yes", "yet", "particularly", "everywhere",
+"www", "gotten", "next", "both", "secondly", "que", "having", "rd",
+"re", "consequently", "awfully", "ain't", "used", "quot", "wherever", "during",
+"isn't", "user", "uses", "comes", "when", "seemed", "two", "system",
+"may", "you'll", "later", "under", "mainly", "last", "old", "first",
+"except", "known", "so", "four", "came", "would", "knows", "help",
+"became", "actually", "nothing", "keep", "anything", "thanks", "see", "tell",
+"seem", "seen", "beyond", "such", "same", "th", "thank", "several",
+"there's", "therefore", "sorry", "to", "seeing", "thanx", "aside", "alone",
+"along", "they'll", "cant", "described", "it'd", "http", "necessary", "i'll",
+"wherein", "htm", "one", "it's", "somewhere", "we've", "un", "up",
+"us", "per", "changes", "away", "theres", "they'd", "have", "likely",
+"want", "whose", "must", "appreciate", "accordingly", "etc", "three", "amongst",
+"a's", "somehow", "via", "vs", "anyhow", "always", "usually", "sometime",
+"quite", "instead", "five", "selves", "she", "near", "myself", "their",
+"value", "because", "viz", "we", "probably", "liked", "howbeit", "only",
+"others", "thereby", "t's", "looks", "brief", "more", "allow", "shall",
+"merely", "use", "each", "either", "computer", "was", "inc", "specify",
+"following", "way", "specified", "former", "you'd", "six", "normally", "corresponding",
+"often", "goes", "somebody", "although", "please", "most", "nobody", "considering",
+"thru", "you're", "namely", "weren't", "but", "seems", "home", "here",
+"fifth", "until", "c'mon", "else", "also", "allows", "get", "hers",
+"content", "regarding", "specifying", "know", "done", "number", "like", "been",
+"associated", "downwards", "index", "wonder", "thats", "beside", "need", "for",
+"besides", "contains", "never", "they're", "definitely", "immediate", "follows", "less",
+"self", "lest", "going", "name", "maybe", "anybody", "across", "ourselves",
+"hopefully", "well", "someone", "anyone", "your", "already", "web", "wed",
+"whereupon", "look", "everybody", "otherwise", "you", "within", "cannot", "eight",
+"com", "thus", "haven't", "hardly", "took", "nowhere", "thereafter", "seven",
+"hither", "anywhere", "placed", "concerning", "ltd", "course", "our", "out",
+"whom", "won't", "you've", "behind", "toward", "lately", "sent", "moreover",
+"anyways", "fri", "went", "am", "beforehand", "an", "as", "at",
+"happens", "whatever", "mean", "information", "upon", "therein", "anyway", "had",
+"rather", "whether", "be", "herself", "elsewhere", "its", "regards", "who's",
+"has", "did", "own", "without", "seriously", "they've", "who", "by",
+"kept", "here's", "onto", "neither", "i've", "why", "wouldn't", "reasonably",
+"over", "inner", "co", "second", "there", "ought", "the", "indeed",
+"new", "come", "twice", "become", "regardless", "hello", "thu", "certain",
+"together", "least", "do", "couldn't", "thorough", "says", "obviously", "these",
+"possible", "sometimes", "some", "mon", "believe", "unfortunately", "were", "cause",
+"latterly", "another", "gone", "perhaps", "eg", "hadn't", "search", "that's",
+"indicate", "et", "different", "ex", "appear", "various", "hereby", "available",
+"much", "clearly", "thereupon", "forth", "her", "everyone", "uucp", "thoroughly",
+"gets", "getting", "better", "himself", "will", "consider", "especially", "edu",
+"doesn't", "he's", "serious", "soon", "wants", "tends", "all", "nearly",
+"sure", "page", "down", "ours", "plus", "towards", "whereafter", "can't",
+"think", "go", "many", "given", "got", "gives", "entirely", "looking",
+"sub", "than", "that", "little", "sup", "he", "followed", "hi",
+"furthermore", "wasn't", "though", "which", "welcome", "and", "hereafter", "further",
+"it'll", "certainly", "taken", "becomes", "whither", "i'd", "ie", "if",
+"meanwhile", "everything", "greetings", "somewhat", "any", "i'm", "unless", "in",
+"however", "enough", "is", "using", "it", "those", "aren't", "presumably",
+"what's", "again", "him", "whoever", "his", "ignored", "themselves", "theirs",
+"overall", "trying", "through", "insofar", "being", "respectively", "below", "yourself",
+"too", "since", "becoming", "exactly", "third", "take", "still", "according",
+"whenever", "where's", "we'll", "inasmuch", "thence", "yourselves", "them", "then",
+"should", "appropriate", "from", "unlikely", "willing", "they", "c's", "zero",
+"best", "very", "none", "despite", "herein", "could", "far", "hence",
+"tried", "something", "apart", "file", "are", "relatively", "novel", "contain",
+"didn't", "hasn't", "provides", "tries", "me", "able", "off", "whereas",
+"research", "currently", "mostly", "causes", "okay", "let's", "about", "wish",
+"non", "once", "my", "every", "might"};
+
+
+

@@ -1,0 +1,136 @@
+//
+// File: Startup.webl
+//
+// Startup script that executes each time WebL runs to
+// extend the initial context of all future scripts.
+// This means that all variable defined here are visible
+// throughout all scripts.
+//
+// Note: No imports are allowed here in this module !
+
+
+// Load the functions implemented in java
+
+var Assert = Native("webl.lang.builtins.AssertFun");
+var BeginTag = Native("webl.lang.builtins.BeginFun");
+var CallArgs = Native("webl.lang.builtins.CallArgsFun");
+var Children = Native("webl.lang.builtins.ChildrenFun");
+var Clone = Native("webl.lang.builtins.CloneFun");
+var Content = Native("webl.lang.builtins.ContentFun");
+var Delete = Native("webl.lang.builtins.DeleteFun");
+var Elem = Native("webl.lang.builtins.ElemFun");
+var EndTag = Native("webl.lang.builtins.EndFun");
+var Error = Native("webl.lang.builtins.ErrorFun");
+var ErrorLn = Native("webl.lang.builtins.ErrorlnFun");
+var Eval = Native("webl.lang.builtins.EvalFun");
+var Exit = Native("webl.lang.builtins.ExitFun");
+var ExecArgs = Native("webl.lang.builtins.ExecArgsFun");
+var ExpandVariables = Native("webl.lang.builtins.ExpandVariablesFun");
+var ExpandCharEntities = Native("webl.lang.builtins.ExpandCharEntitiesFun");
+var DeleteField = Native("webl.lang.builtins.DeleteFieldFun");
+var First = Native("webl.lang.builtins.FirstFun");
+var Flatten = Native("webl.lang.builtins.FlattenFun");
+var GC = Native("webl.lang.builtins.GCFun");
+var GetURL = Native("webl.lang.builtins.GetURLFun");
+var HeadURL = Native("webl.lang.builtins.HeadURLFun");
+var InsertAfter = Native("webl.lang.builtins.InsertAfterFun");
+var InsertBefore = Native("webl.lang.builtins.InsertBeforeFun");
+var Markup = Native("webl.lang.builtins.MarkupFun");
+var Name = Native("webl.lang.builtins.NameFun");
+var NewPage = Native("webl.lang.builtins.NewPageFun");
+var NewNamedPiece = Native("webl.lang.builtins.NewNamedPieceFun");
+var NewPiece = Native("webl.lang.builtins.NewPieceFun");
+var NewPieceSet = Native("webl.lang.builtins.NewPieceSetFun");
+var Para = Native("webl.lang.builtins.ParaFun");
+var Page = Native("webl.lang.builtins.PageFun");
+var Parent = Native("webl.lang.builtins.ParentFun");
+var Pat = Native("webl.lang.builtins.PatFun");
+var PCData = Native("webl.lang.builtins.PCDataFun");
+var PostURL = Native("webl.lang.builtins.PostURLFun");
+var Pretty = Native("webl.lang.builtins.PrettyFun");
+var Print = Native("webl.lang.builtins.PrintFun");
+var PrintLn = Native("webl.lang.builtins.PrintlnFun");
+var ReadLn = Native("webl.lang.builtins.ReadLnFun");
+var Replace = Native("webl.lang.builtins.ReplaceFun");
+var Rest = Native("webl.lang.builtins.RestFun");
+var Retry = Native("webl.lang.builtins.RetryFun");
+var Select = Native("webl.lang.builtins.SelectFun");
+var Seq = Native("webl.lang.builtins.SeqFun");
+var Size = Native("webl.lang.builtins.SizeFun");
+var Sleep = Native("webl.lang.builtins.SleepFun");
+var Sort = Native("webl.lang.builtins.SortFun");
+var Text = Native("webl.lang.builtins.TextFun");
+var Throw = Native("webl.lang.builtins.ThrowFun");
+var Time = Native("webl.lang.builtins.TimeFun");
+var Timeout = Native("webl.lang.builtins.TimeoutFun");
+var ToChar = Native("webl.lang.builtins.ToCharFun");
+var ToInt = Native("webl.lang.builtins.ToIntFun");
+var ToList = Native("webl.lang.builtins.ToListFun");
+var ToReal = Native("webl.lang.builtins.ToRealFun");
+var ToSet = Native("webl.lang.builtins.ToSetFun");
+var ToString = Native("webl.lang.builtins.ToStringFun");
+var Trap = Native("webl.lang.builtins.TrapFun");
+var Type = Native("webl.lang.builtins.TypeFun");
+
+// Now the functions coded in java
+
+// type testing predicates
+var Boolp = fun(x) Type(x) == "bool" end;
+var Charp = fun(x) Type(x) == "char" end;
+var Funp = fun(x) Type(x) == "fun" end;
+var Intp = fun(x) Type(x) == "int" end;
+var Listp = fun(x) Type(x) == "list" end;
+var Methp = fun(x) Type(x) == "meth" end;
+var Objectp = fun(x) Type(x) == "object" end;
+var Realp = fun(x) Type(x) == "real" end;
+var Setp = fun(x) Type(x) == "set" end;
+var Stringp = fun(x) Type(x) == "string" end;
+var Pagep = fun(x) Type(x) == "page" end;
+var Piecep = fun(x) Type(x) == "piece" end;
+var Tagp = fun(x) Type(x) == "tag" end;
+var PieceSetp = fun(x) Type(x) == "pieceset" end;
+
+var Stall = fun()
+	while true do Sleep(1000000) end;
+	nil
+end;
+
+var NewXMLPiece =
+    fun(str)
+      NewPiece(str, "text/xml")
+    end;
+
+var NewHTMLPiece =
+    fun(str)
+      NewPiece(str, "text/html")
+    end;
+
+var Exec, Call;
+
+if true then						// hides the definition of shell and option
+	var shell, option;
+
+	if PROPS["os.name"] == "Windows NT" then		// Windows NT
+		shell = "cmd"; option = "/C"
+	elsif PROPS["file.separator"] == "/" then		// assume UNIX
+		shell = "csh"; option = "-c"
+	else											// assume DOS/Windows 95
+		shell = "command"; option = "/C"
+	end;
+
+	Exec = fun(s)
+		ExecArgs([shell, option, ExpandVariables(1, s)])
+	end;
+
+	Call = fun(s)
+		CallArgs([shell, option, ExpandVariables(1, s)])
+	end;
+end;
+
+var Sign = fun(x)
+	if x < 0 then -1
+	elsif x > 0 then 1
+	else 0
+	end
+end;
+

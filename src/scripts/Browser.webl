@@ -1,0 +1,47 @@
+// Browser module for simple communication with your Netscape web browser
+
+import Str;
+
+export
+	var ShowPage;
+
+var DDERequest = fun()
+	PrintLn("Panic: Dynamic data exchange (DDE) with web browser not supported on this platform (Windows only)");
+	Exit(1);
+end;
+
+var browser = "NETSCAPE";
+
+export
+	var GetCurrentPage = fun()
+		var res = Str_Split(DDERequest(browser, "WWW_GetWindowInfo", "0xFFFFFFFF"), ",");
+
+		var url = res[0];
+		if url[0] == '"' then 		// strip off quotes
+			url = Select(url, 1, Size(url) - 1)
+		end;
+
+		var title = res[1];
+		if title[0] == '"' then 		// strip off quotes
+			title = Select(title, 1, Size(title) - 1)
+		end;
+		[. url = url, title = title .]
+	end;
+
+export
+	var GotoURL = fun(url)
+		DDERequest(browser, "WWW_OpenURL", `"` + url + `",,0xFFFFFFFF,0,,,NETREPORT`);
+		nil
+	end;
+
+// Rather simplistic way of detecting UNIX, WINDOWS and Macintosh platforms ...
+if PROPS["file.separator"] == "/" then
+	if PROPS["os.name"] == "Mac OS" then
+		ShowPage = Native("weblx.browser.MacShowPageFun");
+	else
+		ShowPage = Native("weblx.browser.UnixShowPageFun");
+	end
+else
+	ShowPage = Native("weblx.browser.WindowsShowPageFun");
+	DDERequest = Native("weblx.browser.DDERequestFun");			// ! override default
+end

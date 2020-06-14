@@ -1,0 +1,2 @@
+export var
+    NewFarm = Native("weblx.farm.NewFarmFun");

@@ -1,0 +1,26 @@
+// str module
+
+export var
+    Match = Native("weblx.str.MatchFun"),
+    Search = Native("weblx.str.SearchFun"),
+
+    StartsWith = Native("weblx.str.StartsWithFun"),
+    EndsWith = Native("weblx.str.EndsWithFun"),
+
+    ToLowerCase = Native("weblx.str.ToLowerCaseFun"),
+    ToUpperCase = Native("weblx.str.ToUpperCaseFun"),
+
+    Trim = Native("weblx.str.TrimFun"),
+    Replace = Native("weblx.str.ReplaceFun"),
+    Compare = Native("weblx.str.CompareFun"),
+    EqualsIgnoreCase = Native("weblx.str.EqualsIgnoreCaseFun"),
+    IndexOf = Native("weblx.str.IndexOfFun"),
+
+	// Str_LastIndexOf(pat: string, s: string): int
+	LastIndexOf = Native("weblx.str.LastIndexOfFun"),
+
+    // Str_Split(s: string, splitchars: string): List (of strings)
+    Split = Native("weblx.str.SplitFun");
+
+
+

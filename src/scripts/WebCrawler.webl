@@ -1,0 +1,59 @@
+// Module WebCrawler
+
+import
+    Str, Farm;
+
+export var Crawler =
+    [.
+        enqueued = [..],      // Pages visited so far (and removed from queue)
+                              // and pages waiting in the queue.
+        farm = nil,           // Will contain the farm after the start method is called.
+
+        // Method that should be overridden.
+        Visit = meth(s, page) PrintLn(page.URL) end,
+        ShouldVisit = meth(s, url) true end,
+
+		// Error reporting
+		Report = meth(s, url, E)
+			PrintLn(url, " err: ", E.msg);
+		end,
+
+        Enqueue = meth(s, url)
+            // First remove everything following # from the URL.
+            var pos = Str_IndexOf("#", url);
+            if pos != -1 then
+                url = Select(url, 0, pos)
+            end;
+            lock s do
+                var present = s.enqueued[url] ? false;
+                if !present and s.ShouldVisit(url) then
+                    s.enqueued[url] := true;
+                    s.farm.Perform(s.ProcessPage(s, url))
+                end
+            end
+        end,
+
+        ProcessPage = fun(s, url)
+            try
+                var page = GetURL(url);            // fetch the page
+                s.Visit(page);
+
+                // Process all the links eminating from this page.
+                every a in Elem(page, "a") do
+                    s.Enqueue(a.href) ? nil
+                end
+            catch E
+                on true do
+                    s.Report(url, E);
+            end;
+        end,
+
+        Start = meth(s, noworkers)
+            s.farm = Farm_NewFarm(noworkers);
+        end,
+
+        Abort = meth(s)
+            s.farm.Stop()
+        end
+    .];
+
