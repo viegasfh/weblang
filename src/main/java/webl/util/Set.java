@@ -101,28 +101,28 @@ public class Set implements Cloneable
     public synchronized String toString() {
         String s = "{";
 
-        Enumeration enum = elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             s += e.toString();
-            if(enum.hasMoreElements())
+            if(enumeration.hasMoreElements())
                 s += ", ";
         }
         return s + "}";
     }
 
     public synchronized void union(Set x) {
-        Enumeration enum = x.elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = x.elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             put(e);
         }
     }
 
     public synchronized void subtract(Set x) {
-        Enumeration enum = x.elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = x.elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             remove(e);
         }
     }
@@ -132,9 +132,9 @@ public class Set implements Cloneable
             return false;
 
         int found = 0;
-        Enumeration enum = elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             if(x.contains(e))
                 found++;
         }
@@ -143,9 +143,9 @@ public class Set implements Cloneable
 
     public int hashCode() {
         int code = 0;
-        Enumeration enum = elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             code += e.hashCode();
         }
         return code;
@@ -158,18 +158,18 @@ public class Set implements Cloneable
     public synchronized Object clone() {
         Set n = new Set();
 
-        Enumeration enum = elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             n.put(e);
         }
         return n;
     }
 
     public synchronized void intersect(Set x) {
-        Enumeration enum = elements();
-        while (enum.hasMoreElements()) {
-            Object e = enum.nextElement();
+        Enumeration enumeration = elements();
+        while (enumeration.hasMoreElements()) {
+            Object e = enumeration.nextElement();
             if(!x.contains(e))
                 remove(e);
         }

@@ -8,22 +8,22 @@ import java.io.*;
 
 public class NewPieceSetFun extends AbstractFunExpr
 {
-    
+
     public String toString() {
         return "<NewPieceSet>";
     }
-    
+
     public Expr Apply(Context c, Vector args, Expr callsite) throws WebLException {
         CheckArgCount(c, args, callsite, 1);
-        
+
         Expr s = ((Expr)(args.elementAt(0))).eval(c);
         if (s instanceof SetExpr) {
             PieceSet R = null;
             Page page = null;
             try {
-                Enumeration enum = ((SetExpr)s).getContent();
-                while (enum.hasMoreElements()) {
-                    Object e = enum.nextElement();
+                Enumeration enumeration = ((SetExpr)s).getContent();
+                while (enumeration.hasMoreElements()) {
+                    Object e = enumeration.nextElement();
                     if (e instanceof Piece) {
                         if (R == null) {
                             page = ((Piece)e).page;

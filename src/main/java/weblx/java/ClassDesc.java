@@ -11,11 +11,11 @@ public class ClassDesc
     public Class               clss;
     public Hashtable           members = new Hashtable();
     public Constr[]            constructor;
-    
+
     static public Integer      Illegal = new Integer(42);
-    
+
     static private Hashtable   cache = new Hashtable();
-    
+
     static public ClassDesc Get(Class clss) {
         synchronized(cache) {
             ClassDesc R = (ClassDesc)cache.get(clss);
@@ -30,23 +30,23 @@ public class ClassDesc
     public boolean empty() {
         return members.size() == 0;
     }
-    
+
     protected ClassDesc(Class clss) {
         Log.debugln("[Importing java class " + clss.getName() + "]");
-        
+
         this.clss = clss;
         LearnConstructors(clss);
         LearnMethods(clss);
         LearnFields(clss);
     }
-    
+
     protected void LearnConstructors(Class clss) {
         Constructor[] C = clss.getConstructors();
         constructor = new Constr[C.length];
-        for (int i = 0; i < C.length; i++) 
+        for (int i = 0; i < C.length; i++)
             constructor[i] = new Constr(C[i]);
     }
-    
+
     protected void LearnFields(Class clss) {
         Field[] F = clss.getFields();
         for (int i = 0; i < F.length; i++) {
@@ -54,16 +54,16 @@ public class ClassDesc
             members.put(Program.Str(f.getName()), f);
         }
     }
-    
+
     protected void LearnMethods(Class clss) {
         Hashtable nhash = new Hashtable();
-        
+
         // Learn all the methods
         Method[] meth = clss.getMethods();
         for (int i = 0; i < meth.length; i++) {
             Method m = meth[i];
             String name = m.getName();
-            
+
             Vector V = (Vector)nhash.get(name);
             if (V == null) {
                 V = new Vector();
@@ -71,24 +71,24 @@ public class ClassDesc
             }
             V.addElement(m);
         }
-        
-        Enumeration enum = nhash.keys();
-        while (enum.hasMoreElements()) {
-            String name = (String)enum.nextElement();
+
+        Enumeration enumeration = nhash.keys();
+        while (enumeration.hasMoreElements()) {
+            String name = (String)enumeration.nextElement();
             Vector V = (Vector)nhash.get(name);
             JavaMethExpr m = new JavaMethExpr(name, clss, V);
             members.put(Program.Str(name), m);
-        }        
+        }
     }
-    
+
     public Enumeration EnumKeys() {
         return members.keys();
     }
-    
+
     public Expr getField(Object obj, Expr key) {
         Object v = members.get(key);
         if (v == null) return null;
-        
+
         if (v instanceof Field) {
             try {
                 Field f = (Field)v;
@@ -101,11 +101,11 @@ public class ClassDesc
         }
         return (Expr)v;
     }
-    
+
     public boolean setField(Object obj, Expr key, Expr val) {
         Object v = members.get(key);
         if (v == null) return false;
-        
+
         if (v instanceof Field) {
             try {
                 Field f = (Field)v;
@@ -120,9 +120,9 @@ public class ClassDesc
                 return false;
             }
         } else
-            return false;        
+            return false;
     }
-    
+
     public Expr New(Context cc, Expr callsite, Vector arg) throws WebLException {
         int bestconstructor = -1;
         int bestdistance = 1000;
@@ -133,36 +133,36 @@ public class ClassDesc
                 bestconstructor = i;
             }
         }
-        
-        if (bestconstructor == -1) 
+
+        if (bestconstructor == -1)
             throw new WebLException(cc, callsite, "NoApplicableJavaConstructor", "no java constructor was found that matched the actual arguments");
 
         Constr C = constructor[bestconstructor];
-        
+
         Object[] cargs = Convert2Java(cc, callsite, arg, C.param);
         try {
             Object result = C.constructor.newInstance(cargs);
             if (result == null)
                 return Program.nilval;
-                
-            Expr res = Convert2WebL(result);            
-            if (res == null) 
+
+            Expr res = Convert2WebL(result);
+            if (res == null)
                 throw new WebLException(cc, callsite, "ConversionError", "Could not convert return value of type " + result.getClass().getName() + " to a WebL type");
             return res;
         } catch (InstantiationException e) {
             throw new WebLException(cc, callsite, "InstantiationError", "object could not be instantiated");
         } catch (InvocationTargetException e) {
             Throwable E = e.getTargetException();
-            throw new WebLException(cc, callsite, E.getClass().getName(), E.toString());            
+            throw new WebLException(cc, callsite, E.getClass().getName(), E.toString());
         } catch (IllegalAccessException e) {
             throw new WebLException(cc, callsite, "IllegalAccessError", "Illegal access exception");
-        }        
+        }
     }
-    
+
     static public int Distance(Vector arg, Class[] param) {
         if (param.length != arg.size())         // wrong number of args
             return 1000;
-        
+
         int distance = 0;
         for (int j = 0; j < arg.size(); j++) {  // argument distance calculation
             Expr e = (Expr)(arg.elementAt(j));
@@ -171,7 +171,7 @@ public class ClassDesc
         }
         return distance;
     }
-    
+
     static public int Distance(Expr e, Class c) {
         if (e instanceof BooleanExpr) {
             if (c == boolean.class) return 0;
@@ -216,21 +216,21 @@ public class ClassDesc
                 return 1000;
         } else if (c.isAssignableFrom(e.getClass())) {
             return 0;
-        } else 
+        } else
             return 1000;
-    }    
-    
+    }
+
     static public Object[] Convert2Java(Context cc, Expr callsite, Vector arg, Class[] par) throws WebLException {
         Object[] cargs = new Object[arg.size()];
-        for (int j = 0; j < arg.size(); j++) { 
+        for (int j = 0; j < arg.size(); j++) {
             Expr e = (Expr)(arg.elementAt(j));
             cargs[j] = Convert2Java(e, par[j]);
-            if (cargs[j] == Illegal) 
+            if (cargs[j] == Illegal)
                 throw new WebLException(cc, callsite, "ConversionError", "Could not convert " + e + " to " + par[j].getName());
         }
         return cargs;
     }
-    
+
     static public Object Convert2Java(Expr e, Class c) {
         if (e instanceof BooleanExpr) {
             if (c == boolean.class)
@@ -269,10 +269,10 @@ public class ClassDesc
             return ((JavaObjectExpr)e).obj;
         } else if (e instanceof JavaArrayExpr) {
             return ((JavaArrayExpr)e).array;
-        } else 
+        } else
             return e;
     }
-    
+
     static public Expr Convert2WebL(Object o) {
         if (o == null) {
             return Program.nilval;
@@ -312,9 +312,9 @@ class Constr
 {
     public Constructor      constructor;
     public Class[]          param;
-    
+
     public Constr(Constructor C) {
         constructor = C;
-        param = C.getParameterTypes();  
+        param = C.getParameterTypes();
     }
 }

@@ -10,16 +10,16 @@ public class ToSetFun extends AbstractFunExpr
     public String toString() {
         return "<ToSet>";
     }
-    
+
     public Expr Apply(Context c, Vector args, Expr callsite) throws WebLException {
         CheckArgCount(c, args, callsite, 1);
         Expr t = ((Expr)(args.elementAt(0))).eval(c);
         if (t instanceof ContentEnumeration) {
             SetExpr R = new SetExpr();
-            
-            Enumeration enum = ((ContentEnumeration)t).getContent();
-            while (enum.hasMoreElements()) {
-                Expr x = (Expr)(enum.nextElement());
+
+            Enumeration enumeration = ((ContentEnumeration)t).getContent();
+            while (enumeration.hasMoreElements()) {
+                Expr x = (Expr)(enumeration.nextElement());
                 R.DestructivePut(x);
             }
             return R;

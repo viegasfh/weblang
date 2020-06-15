@@ -14,7 +14,7 @@ public class CookieDB
         if (cookie != null) {
             try {
                 Cookie C = new Cookie(url, cookie);
-                
+
                 // do a sanity check
                 if (!C.Match(url)) {
                     // Host is trying to set an illegal cookie
@@ -31,7 +31,7 @@ public class CookieDB
             }
         }
     }
-    
+
     public synchronized void SaveCookie(Cookie C) {
         if (C != null) {
             Cookie first = (Cookie)hash.get(C.domainkey);
@@ -41,7 +41,7 @@ public class CookieDB
             } else {        // add entry
                 Cookie p = first;
                 Cookie prev = null;
-                
+
                 // we keep the entries sorted by path lengths
                 while(p != null && p.pathlen >= C.pathlen) {
                     if (C.domain.equals(p.domain) && C.cookiename.equals(p.cookiename)
@@ -52,7 +52,7 @@ public class CookieDB
                         else
                             hash.put(C.domainkey, C);
                         return;
-                    } 
+                    }
                     prev = p;
                     p = p.next;
                 }
@@ -79,19 +79,19 @@ public class CookieDB
             }
             p = p.next;
         }
-        if (s.length() > 0) 
+        if (s.length() > 0)
             return s.toString();
         else
             return null;
     }
-    
+
     public synchronized void SetCookie(URL url, HttpURLConnection c) {
         String cookie = GetCookies(url);
         if (cookie != null) {
             c.setRequestProperty("Cookie", cookie);
         }
     }
-    
+
     public synchronized void Load(Reader data) throws IOException, IllegalCookieException, MalformedURL {
         BufferedReader R = new BufferedReader(data);
         String line = R.readLine();
@@ -101,12 +101,12 @@ public class CookieDB
             line = R.readLine();
         }
     }
-    
+
     public synchronized void Save(Writer data) throws IOException  {
         PrintWriter W = new PrintWriter(data);
-        Enumeration enum = hash.elements();
-        while(enum.hasMoreElements()) {
-            Cookie C = (Cookie)enum.nextElement();
+        Enumeration enumeration = hash.elements();
+        while(enumeration.hasMoreElements()) {
+            Cookie C = (Cookie)enumeration.nextElement();
             while (C != null) {
                 W.println(C.toString());
                 C = C.next;

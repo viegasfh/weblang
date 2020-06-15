@@ -10,16 +10,16 @@ public class ToListFun extends AbstractFunExpr
     public String toString() {
         return "<ToList>";
     }
-    
+
     public Expr Apply(Context c, Vector args, Expr callsite) throws WebLException {
         CheckArgCount(c, args, callsite, 1);
         Expr t = ((Expr)(args.elementAt(0))).eval(c);
         if (t instanceof ContentEnumeration) {
             ListExpr R = new ListExpr();
-            
-            Enumeration enum = ((ContentEnumeration)t).getContent();
-            while (enum.hasMoreElements()) {
-                Expr x = (Expr)(enum.nextElement());
+
+            Enumeration enumeration = ((ContentEnumeration)t).getContent();
+            while (enumeration.hasMoreElements()) {
+                Expr x = (Expr)(enumeration.nextElement());
                 R = R.Append(x);
             }
             return R;

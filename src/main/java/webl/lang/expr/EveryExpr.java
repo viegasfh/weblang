@@ -20,23 +20,23 @@ public class EveryExpr extends Expr
     }
 
     public Expr eval(Context c) throws WebLException {
-        
+
         Expr col = collection.eval(c);
-        
+
         if (col instanceof ContentEnumeration) {
             Expr R = Program.nilval;
-            
-            Enumeration enum = ((ContentEnumeration)col).getContent();
-            while (enum.hasMoreElements()) {
-                Expr x = (Expr)(enum.nextElement());
-                
+
+            Enumeration enumeration = ((ContentEnumeration)col).getContent();
+            while (enumeration.hasMoreElements()) {
+                Expr x = (Expr)(enumeration.nextElement());
+
                 loopvar.assign(c, x);
                 R = body.eval(c);
                 BasicThread.Check();
             }
             return R;
         } else
-            throw new WebLException(c, this, "NotEnumerable", "expression does not have enumerable contents");
-            
+            throw new WebLException(c, this, "NotEnumerable", "expression does not have enumerationerable contents");
+
     }
 }

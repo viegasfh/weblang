@@ -5,22 +5,22 @@ import webl.util.*;
 
 public class MIMEType
 {
-    String      buf;    
+    String      buf;
     int         len;
     int         pos;
     int         ch;
-    
+
     String      type;
     String      subtype;
     Hashtable   param = new Hashtable();
-    
+
     public MIMEType(String name) throws IllegalMIMETypeException {
         buf = name;
         len = name.length();
         pos = 0;
         get();
         skip();
-        
+
         type = readname().toLowerCase();
         if (ch == '/') {
             get();
@@ -43,21 +43,21 @@ public class MIMEType
         if (ch != -1)
             throw new IllegalMIMETypeException("illegal mimetype " + buf);
     }
-    
+
     public String getType() {
         return type;
     }
-    
+
     public String getSubtype() {
         return subtype;
     }
-    
+
     public String getTypeSlashSubType() {
         StringBuffer s = new StringBuffer();
         s.append(type).append('/').append(subtype);
         return s.toString();
     }
-    
+
     public String getParameter(String p) {
         Object o = param.get(p);
         if (o != null)
@@ -65,21 +65,21 @@ public class MIMEType
         else
             return null;
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer();
-        
+
         s.append(type).append('/').append(subtype);
-        
-        Enumeration enum = param.keys();
-        while (enum.hasMoreElements()) {
-            String attr = (String)(enum.nextElement());
+
+        Enumeration enumeration = param.keys();
+        while (enumeration.hasMoreElements()) {
+            String attr = (String)(enumeration.nextElement());
             String val = (String)(param.get(attr));
             s.append(" ;").append(attr).append("=\"").append(val).append('\"');
         }
         return s.toString();
     }
-    
+
     private void get() {
         try {
             ch = buf.charAt(pos++);
@@ -87,12 +87,12 @@ public class MIMEType
             ch = -1;
         }
     }
-    
+
     private void skip() {
         while (ch != -1 && ch <= ' ')
             get();
     }
-    
+
     private String readname() {
         StringBuffer s = new StringBuffer();
         while (ch != -1 && ch > ' ' && !tspecial(ch)) {
@@ -102,11 +102,11 @@ public class MIMEType
         skip();
         return s.toString();
     }
-    
+
     private String readstring() {
         int match = ch;
         get();
-        
+
         StringBuffer s = new StringBuffer();
         while (ch != -1 && ch != match) {
             s.append((char)ch);
@@ -116,22 +116,22 @@ public class MIMEType
             get();
         skip();
         return s.toString();
-    }    
-    
+    }
+
     boolean tspecial(int ch) {
         return ch == '(' || ch == ')' || ch == '<' || ch == '>' || ch == '@' ||
                ch == ',' || ch == ';' || ch == ':' || ch == '\\' || ch == '"' ||
                ch == '/' || ch == '[' || ch == ']' || ch == '?' || ch == '=';
     }
-    
+
 // alias tables for MIME charset parameter
 
     private static Hashtable aliases = new Hashtable();
-    
+
     private static void putalias(String alias, String charset) {
         aliases.put(alias.toLowerCase(), charset);
     }
-    
+
     static {
         putalias("UTF-8", "UTF8");
         putalias("UTF-16", "Unicode");
@@ -147,14 +147,14 @@ public class MIMEType
         putalias("iso-8859-1", "8859_1");
         putalias("iso8859", "8859_1");
     }
-    
+
     public static String UnAliasCharset(String enc) {
         Object o = aliases.get(enc.toLowerCase());
         if (o != null)
             return (String)o;
         else
             return enc;
-    }    
+    }
 }
 
 /* MIME type syntax according to RFC 2045:
