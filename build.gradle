@@ -1,6 +1,15 @@
 apply plugin: 'java'
 
-//compileJava {
-//  options.compilerArgs << "-Xlint:deprecation"
-//  options.compilerArgs << "-Xlint:unchecked"
-//}
+compileJava {
+  options.compilerArgs << "-Xlint:deprecation"
+  options.compilerArgs << "-Xlint:unchecked"
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+  compile group: 'net.imagej', name: 'ij', version: '1.48r'
+}

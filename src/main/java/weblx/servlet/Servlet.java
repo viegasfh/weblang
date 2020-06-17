@@ -240,7 +240,7 @@ public class Servlet extends HttpServlet
             
             startuplog.debugln("Module: " + module + " Name: " + name);
             
-            Module M = machine.loadModule(module, true, startuplog);
+            webl.lang.Module M = machine.loadModule(module, true, startuplog);
             if (M == null)
                 throw new ServletException("Error while loading WebL module " + module +
                     System.getProperty("line.separator") + startuplog.toString());
