@@ -7,7 +7,7 @@ public class VarExpr extends Expr
     public String  name;           // variable name
     public int     varOffset;      // in context stack
     public int     levelsUp;       // how many levels up in context stack
-    public Module  mod;            // if reference to designator in another module
+    public webl.lang.Module  mod;            // if reference to designator in another module
     
     public VarExpr(String name, int varOffset, int levelsUp) {
         super(-1);
@@ -17,7 +17,7 @@ public class VarExpr extends Expr
         this.mod = null;
     }
     
-    public VarExpr(String name, Module mod, int varOffset) {
+    public VarExpr(String name, webl.lang.Module mod, int varOffset) {
         super(-1);
         this.name = name;
         this.varOffset = varOffset;

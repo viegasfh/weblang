@@ -4,7 +4,6 @@ import webl.lang.*;
 import webl.lang.expr.*;
 import webl.page.*;
 import java.util.*;
-import com.oroinc.text.regex.*;
 
 public class SeqFun extends AbstractFunExpr
 {
