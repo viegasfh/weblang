@@ -47,7 +47,12 @@ public class AutoStreamReader extends Reader {
 	    	this.encoding = selectEncoder();
 
 	    InputStream is = new ByteArrayInputStream(bb);
-	    InputStreamReader isReader = new InputStreamReader(is, this.encoding);
+	    InputStreamReader isReader = null;
+
+        if (this.encoding.equals(""))
+            isReader = new InputStreamReader(is);
+        else
+            isReader = new InputStreamReader(is, this.encoding);
 	    reader = new BufferedReader(isReader);
     }
 
