@@ -1,0 +1,523 @@
+//**************************************************************************
+// File:    Interact.webl
+// Purpose: Interactive WebL Interpreter for development 
+//          and debugging of WebL code
+// Author:  Adam Cheyer 
+// Date:    3/22/02
+// Release notes and version history below in "release" documentation
+// License: you may use as you wish, just don't expect support or anything...
+//**************************************************************************
+
+import Files, Str;
+
+
+//**************************************************************************
+// Global variables
+//**************************************************************************
+
+var cachefile = "cache.html";  // Cached HTML file
+var MaxHistory = 16;     // Max history size
+
+var fileStr = "";	// Stores contents of WebL file loaded in memory
+var fileLoaded = "";	// Stores name of WebL file loaded in memory
+var fileImports = {};   // Set of imported modules in fileStr
+var bodyStr = "";	// Stores variable assignments and commands with 
+                        //   side effects that must be executed in context
+var vars = {};		// Set of variables currently defined
+var history = [];	// List of last commands entered
+var error = false;      // Records if error was thrown during eval
+var counter = 1;        // Command counter
+
+// ***************** Utility functions *********************
+
+//*************************************************************************
+// name:    RemoveQuotes
+// purpose: Removes surround ' marks or " or ` marks if any
+// Input  String param: potentially quoted string
+// Output String Value: string with single quotes removed
+//************************************************************************
+
+var RemoveQuotes = fun (str)
+   var sz = Size(str);
+   if sz == 0 then
+      return str
+   end;
+   if ((str[0] == '\'') or (str[0] == '"') or (str[0] == '`')) then
+      str = Select(str, 1, sz)
+   end;
+   sz = Size(str);
+   if ((str[sz-1] == '\'') or (str[sz-1] == '"') or (str[0] == '`')) then
+      str = Select(str, 0, sz-1)
+   end;
+   return str
+end;
+
+
+//*************************************************************************
+// name:    RemoveLast
+// purpose: Removes char c if last character in string
+//************************************************************************
+
+var RemoveLast = fun (str, c)
+   var sz = Size(str);
+   if sz == 0 then
+      return str
+   end;
+   if (str[sz-1] == c) then
+      str = Select(str, 0, sz-1)
+   end;
+   return str
+end;
+
+//*************************************************************************
+// name:    ReplaceAll
+// purpose: Replace all occurences of a String in a string
+//************************************************************************
+var ReplaceAll = fun (str, sub, by)
+   var p = Str_IndexOf(sub, str);
+
+   if (p >= 0) then
+      var left = Select(str, 0, p);
+      var right = Select(str, p+Size(sub), Size(str));
+      str = left + by  + ReplaceAll(right, sub, by)
+   end;
+   return str
+end;
+
+//************************************************************************
+// Name : Load
+// Purpose : Load a page from a URL and optionally cache file
+// Input : A URL and a cache filename
+// Output : Page
+//************************************************************************
+var LoadUrl = fun(inURL, inFile, saveCache)
+   var P;
+   
+   inURL = RemoveQuotes(inURL);
+
+   try
+         PrintLn("Loading URL ", inURL, "...");
+         P = GetURL(inURL);
+         if (saveCache) then
+            Files_SaveToFile(inFile, Pretty(P))
+         end;
+         PrintLn("Loaded URL into variable P.")
+      
+   catch E
+      on true do
+         PrintLn("Couldn't load URL " + inURL);
+         return nil;
+   end;
+   return P;
+end;
+
+//************************************************************************
+// Name : PostUrl
+// Purpose : Posts URL with vars and optionally caches result file
+// Input : A URL, varlist and a cache filename
+// Output : Page
+//************************************************************************
+var PostUrl = fun(inURL, vars, inFile, saveCache)
+   var P;
+   
+   inURL = RemoveQuotes(inURL);
+
+   try
+         PrintLn("Posting URL ", inURL, "with vars", vars, "...");
+         P = PostURL(inURL, vars);
+         if (saveCache) then
+            Files_SaveToFile(inFile, Pretty(P))
+         end;
+         PrintLn("Saved result into variable P.")
+      
+   catch E
+      on true do
+         PrintLn("Couldn't Post URL " + inURL);
+         return nil;
+   end;
+   return P;
+end;
+
+
+
+// ***************** Core functions *********************
+
+//************************************************************************
+// Name    : ParseCmd
+// Purpose : Parses a command and returns the function name, args, and 
+//           restargs (for some commands)
+// Notes   : Lines may be entered in the form
+//              var = Expression
+//              Function(Args)
+//              Function
+//************************************************************************
+var ParseCmd = fun(line)
+
+    var func, args, restargs;
+    line = ReplaceAll(line, "\n", " ");
+    line = ReplaceAll(line, "\r", "");
+    line = Str_Trim(line);    
+    line = RemoveLast(line, ';');
+    var cmd = Str_Match(line, `(\w+)\((.*)\)`);
+    // Bug with ASN
+    var asn = nil;     // Str_Match(line, `(.+)\s*\:=\s*(.*)`);
+    var eql = Str_Match(line, `(\w+)\s*=\s*(.*)`);
+    
+    if asn != nil then
+       func = ":=";
+       args = asn[1];
+       restargs = asn[2];
+    elsif eql != nil then
+       func = "=";
+       args = eql[1];
+       restargs = eql[2];
+    elsif (cmd != nil) then
+       func = cmd[1];
+       args = cmd[2];
+    else
+       func = line;
+       args = ""
+    end;
+    
+    return [func, args, restargs]
+end;
+
+var DeclaredImports = fun(fileStr)
+    var ImportSet = {};
+    var ImportList;
+    // Remove all imports already contained in file
+    ImportList = Str_Search(fileStr,`import\s+((\w+\s*,?\s*)+);`);
+    every l in ImportList do
+       var IL = Str_Search(l[1], `\w+`);
+       var i;
+       every i in IL do
+          ImportSet = ImportSet + {i[0]}
+       end
+    end;
+    return ImportSet
+end;
+
+
+//************************************************************************
+// Name    :  EvaluateInContext
+// Purpose : Construct context for command and execute
+//************************************************************************
+
+var EvaluateInContext = fun(line)
+    // calculate imports
+    var c = "";
+    var l;
+    var imports = "";
+    var ImportList = Str_Search(bodyStr + line,`(\w+)_\w+\(`);
+    var ImportSet = {};
+    every imp in ImportList do
+       ImportSet = ImportSet + {imp[1]}
+    end;
+    ImportSet = ImportSet - fileImports;    
+    every importFile in ImportSet do
+       imports = imports + "import " + importFile + ";\n";
+    end;
+    // Add variable definitions
+    every v in vars do
+       c = c + "var " + v + ";\n";
+    end;
+    // Build context for new command: loaded file, var defs and bindings, cmd
+    c = imports + fileStr + c + bodyStr + line;
+       
+    // For debugging: see context and command that will be interpreted
+    Files_SaveToFile("tmp.webl", c);
+       
+    // Execute!
+    error = false;
+    try
+       line = Eval(c);
+    catch E
+      on true do
+      	 error = true;
+         return E
+    end;
+    return line
+end;
+
+//************************************************************************
+// Name : Interpret
+// Purpose : Interpret a command typed in by the user.
+//************************************************************************
+
+var Interpret = fun(line)
+
+    var func, args, restargs, cmd;
+    
+    cmd = ParseCmd(line);
+    func = cmd[0];
+    args = cmd[1];
+    restargs = cmd[2];
+  
+    // Add current line to history and make sure doesn't get too big
+    history = [line] + history;
+    if (Size(history) > MaxHistory) then
+       history = Select(history, 0, MaxHistory)
+    end;
+    
+    // Select command from history
+    if (func != "") and (func[0] == '!') then
+    	var index;
+    	if func[1] == '!' then
+    	   index = counter - 1
+    	else 
+    	   index = ToInt(Select(func, 1, Size(func)));
+    	end;
+        index = counter - index;
+    	if (index > 0) and (index < Size(history)) then
+    	   line = history[index];
+    	   PrintLn("WEBL ", counter, "> ", line);
+    	   history = [line] + Rest(history);
+    	   cmd = ParseCmd(line);
+    	   func = cmd[0];
+    	   args = cmd[1];
+    	   restargs = cmd[2]
+    	else
+    	   PrintLn("No history element found for: ", func);
+    	   line = "No.";
+    	   return line
+    	end
+    end;
+
+    // display history	
+    if func == "history" then
+        var i = 0;
+        i = Size(history) - 2;
+        while i >= 0 do
+           PrintLn(counter - i, ": ", history[i]);
+           i = i - 1
+        end;
+    	line = "OK."
+    	
+    // clear memory
+    elsif func == "clear" then
+    	bodyStr = "";
+    	fileStr = "";
+    	fileImports = {};
+    	vars = {};
+    	line = "OK.";
+    
+    // display vars and values
+    elsif func == "vars" then
+       var c = "";
+       every v in vars do
+       	   c = c + "PrintLn(\"  " + v + ": \\t\", " + v +");\n"
+       end;
+       if (c != "") then
+          EvaluateInContext(c)
+       end;
+       line = "OK.";
+    
+    	
+    // Exit
+    elsif (func == "exit") or (func == "quit")  or (func == "halt") then
+    	PrintLn
+    	
+    // Display help
+    elsif func == "help" then
+    	PrintLn(" ");
+    	PrintLn("Type a WebL expression and see it's evaluated results (no need for PrintLn)");
+    	PrintLn(" ");
+    	PrintLn("Special additions to WebL:");
+    	PrintLn("  - variables do NOT need to be predefined");
+    	PrintLn("      (e.g. can do X = 1 without first defining var X");
+    	PrintLn("  - imports do NOT need to be predefined for commands");
+    	PrintLn("      (e.g. can use Str_Search() without first importing Str");
+    	PrintLn(" ");
+    	PrintLn("Interpreter Commands:");
+    	PrintLn("  - loadUrl(URL)      Loads URL and saves it to variable P (and cache)");
+    	PrintLn("                      Use this when possible instead of P = GetURL(URL) as");
+    	PrintLn("                      is more efficient in this interpreter (see release notes)");
+    	PrintLn("  - loadUrl           Fetches last page P from cache (doesn't access web)");
+    	PrintLn("                      Cache persists even after quitting interpreter");
+    	PrintLn("                      in file \"" + cachefile + `"`);
+    	PrintLn("  - postUrl(URL,vars) Posts URL with vars and saves it to variable P (and cache)");
+    	PrintLn("                      Use this when possible instead of P = GetURL(URL) as");
+    	PrintLn("                      is more efficient in this interpreter (see release notes)");
+    	PrintLn("  - loadFile(FILE)    Loads an HTML/XML file into variable P.");
+    	PrintLn("  - loadWebL(FILE)    Loads a webl file into memory (one only, overwrites last)");
+    	PrintLn("  - loadWebL          Reloads last webl file");
+    	PrintLn("  - clear             Clears session: var defs, loaded file and loaded url");
+    	PrintLn("  - history           Prints command history");
+    	PrintLn("  - vars              See current vars and their values");
+    	PrintLn("  - !!                Repeat last command");
+    	PrintLn("  - !<n>              Repeats a command in saved history");
+    	PrintLn("  - .                 Begin multiline command (end with another '.')");
+    	PrintLn("  - release           Prints release notes (known bugs etc)");
+    	PrintLn("  - help              Prints this message");
+    	PrintLn("  - exit, quit, halt  Quits interpreter");
+    	PrintLn(" ");
+  	line = "OK.";
+    	
+    // Dislay release information
+    elsif func == "release" then
+    	PrintLn(" ");
+    	PrintLn("WebL Interactive  by Adam Cheyer (adam.cheyer@dejima.com)");
+    	PrintLn("  1.2: 03/22/02 - Added multiline commands");
+    	PrintLn("  1.1: 01/03/00 - Bug fixed in automatic imports.");
+    	PrintLn("  1.0: 12/31/99 - Initial Release");
+    	PrintLn(" ");
+    	PrintLn("Known issues:");
+    	PrintLn("  - Automatic import could get confused if command contains a _ ");
+    	PrintLn("      in a string");
+    	PrintLn("  - Object assignment (:= operator) not implemented.");
+    	PrintLn("  - To reproduce context, variable bindings are REASSIGNED for each command,");
+    	PrintLn("    (values are NOT saved, they are recomputed).  Hence if a variable is ");
+    	PrintLn("    set by a command that is slow to execute (e.g. P = GetURL(...)),");
+    	PrintLn("    every interpretation will reexecute all previous computations");
+    	PrintLn("    (e.g. load the URL again).  This is an example of why the loadUrl(URL)");
+    	PrintLn("    command is supplied as a special case around this problem.");
+    	PrintLn(" ");
+    	PrintLn("Future enhancements:");
+    	PrintLn("  - Save/Load session");
+    	PrintLn("  - Command line args: start with session, url, file, etc.");
+    	PrintLn(" ");
+    	line = "OK.";
+    	
+    // Save variable binding in bodyStr
+    elsif (func == "=") or (func == ":=") then
+    	// First check that restargs is a legal expression that doesn't product
+    	//   error
+    	var result = EvaluateInContext( restargs );
+    	if (!error) then
+    	   vars = vars + {args};
+    	   bodyStr = bodyStr + args + func + restargs + ";\n";
+    	   // Result can often be too large to display by default, so return line
+    	   // return result
+    	   return line   
+    	else
+    	   return result
+    	end
+
+    // Loads a WebL file into memory so you can interactively test functions
+    // Be careful which files you load: the WebL file shouldn't have main Loop 
+    //    for instance!
+    // Typing loadWebL without args reloads previous file loaded
+    elsif (func == "loadWebL") or (func == "reloadWebL") then
+    	try
+  	   line = "OK.";
+    	   if (args != "") then
+       	      fileLoaded = RemoveQuotes(args);
+       	      fileStr = Files_LoadStringFromFile(fileLoaded);
+       	   elsif fileLoaded != "" then
+              PrintLn("Loading WEBL File: " + fileLoaded);
+       	      fileStr = Files_LoadStringFromFile(fileLoaded);
+       	   else
+       	      PrintLn("No previous file loaded to reload.");
+       	      line = "No.";
+       	      return line
+       	   end;
+       	   fileImports = DeclaredImports(fileStr);
+    	   // Check that file loads OK
+       	   var result = EvaluateInContext( "" );
+    	   if (error) then
+    	     fileStr = "";
+    	     fileImports = {};
+    	     line = "--> Error, so file removed from memory. Fix and try again.";
+    	   end;
+       	   
+       	catch E
+         on true do
+            PrintLn("Error loading " + fileLoaded);
+            fileLoaded = "";
+            line = "No."
+        end
+       	
+       
+    // Loads 
+    elsif (func == "loadUrl") or (func == "loadFile") or (func == "reloadUrl") or (func == "postUrl") then
+    	if (func == "loadFile") then
+           try
+              var Page = Files_LoadFromFile(RemoveQuotes(args), "text/html");
+       	      vars = vars + {"P"};
+              bodyStr = bodyStr + "P = Files_LoadFromFile(\"" + args + `", "text/html");` + "\n";
+              PrintLn("Loading file " + args + " into variable P.");
+              line = "OK."   		               
+           catch E
+              on true do
+              	 line = "Error loading file: " + args
+           end
+   	elsif (args != "")  then
+    	   var P;
+       	   Files_Delete(cachefile);
+       	   if (func == "postUrl") then
+       	       var u = RemoveQuotes(Select(args, 0, Str_IndexOf(",", args)));
+       	       restargs = Select(args, Str_IndexOf(",",args)+1, Size(args));
+       	       PrintLn("args = ", u);
+       	       PrintLn("rest = ", restargs);
+       	       P = PostUrl(u, restargs, cachefile, true)
+       	   else
+       	       P = LoadUrl(args, cachefile, true)
+       	   end;
+       	   if (P != nil) then
+       	      vars = vars + {"P"};
+       	      bodyStr = bodyStr + "P = Files_LoadFromFile(\"" + cachefile + `", "text/html");` + "\n";
+     	      line = "OK.";
+       	   else
+       	      line = "NO."
+       	   end
+       	else
+           PrintLn("Loading previously cached URL into variable P.");
+       	   vars = vars + {"P"};
+           bodyStr = bodyStr + "P = Files_LoadFromFile(\"" + cachefile + `", "text/html");` + "\n";
+       	end
+       	
+    // Anything else is a WebL command that should be evaluated
+    elsif line != "" then
+       return(EvaluateInContext(line))
+    end;
+    
+    return line;   
+end;
+
+
+
+//************************************************************************
+// Name : main
+// Purpose : Top read-eval-print loop for interpreter
+//************************************************************************
+
+var main = fun()
+
+   var done = false;
+   var line, res;
+  
+   PrintLn(" ");
+   PrintLn(" ");
+   PrintLn("WebL Interactive, v1.0");
+   PrintLn("by Adam Cheyer (adam.cheyer@dejima.com)");
+   PrintLn("Type help for instructions."); 
+   PrintLn(" ");
+   while !done do
+      Print("WEBL "+ToString(counter)+"> ");
+      line = ReadLn();
+      if Str_Trim(line) == "." then
+         line = "";
+         var l;
+         repeat
+            Print("WEBL "+ToString(counter)+"| ");
+            l = ReadLn();
+            if l != "." then
+               line = line + l + "\r\n"
+            end;
+      	 until 
+      	    Str_Trim(l) == "."
+      	 end
+      end;
+      if line != "" then
+         res = Interpret(line);
+         PrintLn(res);
+         counter = counter + 1;
+         PrintLn(" ")
+      end;
+      done = (res == "exit" or res == "quit" or res == "halt")
+   end   
+end;
+
+ 
+main();
+  

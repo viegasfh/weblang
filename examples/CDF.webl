@@ -1,0 +1,30 @@
+//
+// Script to read a Content Definition Format (CDF) channel
+// and build a simple newspaper out of it. This script
+// illustrates the use of XML.
+//
+
+import Browser;
+
+var page = "";
+
+var write = fun(s)
+	page = page + s
+end;
+
+var P = GetURL("http://www.digital.com/rcfoc/rcfoc.cdf" , nil, nil, [. mimetype="text/xml".]);
+
+write("<html><body><h1>");
+write(Elem(P, "CHANNEL")[0].title);
+write("</h1><ul>");
+
+every story in Elem(P, "ITEM") do
+	write("<li><a href=");
+	write(story.href);
+	write(">");
+	write(story.title);
+	write("</a></li>");
+end;
+
+write("</ul></body></html>");
+Browser_ShowPage(page);

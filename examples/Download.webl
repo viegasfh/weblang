@@ -1,0 +1,38 @@
+//
+// Downloads the Compaq home page
+// and all images it contains so the
+// page can be viewed from the local
+// disk. Requires a destination 
+// directory c:\test to exist.
+//
+
+import Str, Files, Url;
+
+var Filename = fun(path)
+	var p = Str_LastIndexOf("/", path);
+	if p != -1 then Select(path, p+1, Size(path))
+	else ""
+	end
+end;
+
+var Download = fun(url, dir)
+  var downloaded = {};
+  var page = GetURL(url);
+  every img in Elem(page, "img") do
+    var u = Url_Split(img.src);
+    var fname = Filename(u.path);
+	if !(fname member downloaded) then
+		PrintLn(img.src, "->", dir + fname);
+	    Files_GetURL(img.src, dir + fname);
+	    downloaded = downloaded + {fname};
+	end;
+    img.src = fname;
+  end;
+
+  var output = Filename(Url_Split(url).path);
+  if output == "" then output = "root.html" end;
+
+  Files_SaveToFile(dir + output, Markup(page));
+end;
+
+Download("http://www.compaq.com", "c:\\test\\");

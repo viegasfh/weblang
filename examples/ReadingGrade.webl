@@ -1,0 +1,113 @@
+// Program to sort headlines articles found on www.news.com
+// according to the Kincaid formula for readability scores.
+// The sorted article list (most readable articles at the top)
+// is output to the file kincaid.txt.
+//
+// The Kincaid score ranges from 5.5 to 16.5 in reading grade
+// level. Its is based on Navy training manuals. This implementation
+// does not calculate the true score as it takes some shortcuts in
+// calculating the number of sentences and syllables in a page. Also,
+// web pages tend to contain a lot of headings and so on, which are
+// not identified correctly as sentences. Web pages differ enough from
+// the Navy manuals that we can conclude that we are calculating only
+// a relative score between relatively similar pages in a corpus.
+
+import
+    Str, Files;
+
+/* Calculate the Kincaid formula, Automatic Readability Index (ARI),
+Coleman-Liau formula, and Flesh Reading ease score of a page. The
+function returns an object with the fields set to these values. */
+var Scores = fun(page)
+    var txt = Text(page);
+
+    // Number of letters in the page.
+    var letters = Size(Str_Search(txt, "[A-Za-z]"));
+    // Number of words in the page.
+    var words = Size(Str_Search(txt, "[0-9a-zA-Z']+"));
+    // The number of syllables in a page is estimated as the
+    // number of vowel groups. This is only a crude approximation.
+    var syllables = Size(Str_Search(txt, "[aeiouy]+"));
+
+    // Match all initials in the page.
+    var exceptions = Pat(page, "[ ]([A-Z0-9][.])+");
+
+    // Replace all initials with a standard pattern.
+    Replace(exceptions, NewPiece(" X ", "text/plain"));
+
+    // Number of sentences now equal to number of periods
+    // in the page (very crude).
+    var sentences = Size(Pat(page, "[.]"));
+
+    [.
+        Sentences = sentences,
+        Words = words,
+        Syllables = syllables,
+
+        ARI = 4.71 * (letters / words) + 0.5 * (words /sentences) - 21.43,
+        Kincaid = 11.8 * (syllables / words) + 0.39 * (words / sentences) - 15.59,
+        CLF = 5.89 * (letters / words) - 0.3 * (sentences / (words / 100)) - 15.8,
+        Flesch = 206.835 - 84.6 * (syllables / words) - 1.015 * (words / sentences)
+     .]
+end;
+
+// Score a list of pages, returning a list of reading score objects.
+var ScorePageList = fun(L)
+    var res = [];
+    var count = 1;
+    every s in L do
+        try
+            PrintLn(count, " scoring ", s);
+            count = count + 1;
+            var page = GetURL(s);
+            var sc = Scores(page);
+            sc.URL := s;
+            sc.Title := Text(Elem(page, "title")[0]);
+            res = res + [sc];
+        catch e         // just report errors
+            on true do PrintLn(e.msg)
+        end;
+    end;
+    res
+end;
+
+// Follows a link on page that contains the specified anchor text.
+var FollowLink = fun(page, anchortext)
+    var dest = (Elem(page, "a") contain Pat(page, anchortext))[0];
+    GetURL(dest.href)
+end;
+
+var GetStories = fun()
+    var res = [];
+    var P = GetURL("http://www.news.com");
+    var A = Elem(P, "a") inside Elem(P, "b") inside 
+                Select(Elem(P, "font"), fun(p) p.size == "+1" ? false end);
+    every a in A do
+        PrintLn(Text(a));
+        res = res + [a.href];
+    end;
+    PrintLn(Size(res), " articles found.");
+    res
+end;
+
+PrintLn("Calculating ...");
+var pages = GetStories();
+var res = ScorePageList(pages);
+
+// Sort articles according to increasing Kincaid score.
+res = Sort(res,
+    fun(a, b)
+        var diff = a.Kincaid - b.Kincaid;
+        if diff > 0.0 then 1
+        elsif diff == 0.0 then 0
+        else -1
+        end
+    end);
+
+// Construct a summary string and write it to disk.
+var s = "";
+every x in res do
+    PrintLn(x.Kincaid, " ", x.Title);
+    s = s + ToString(x.Kincaid) + " " + x.Title + "\r\n";
+end;
+Files_SaveToFile("kincaid.txt", s);

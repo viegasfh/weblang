@@ -1,0 +1,23 @@
+//
+// Script to color all the dead links on a page red.
+// Script illustrates the use of the Timeout and ?
+// service combinators, and modifying a page in place.
+//
+
+import Browser;
+
+var P = GetURL("http://www.yahoo.com/Computers_and_Internet/Standards/");
+
+every L in Elem(P, "a") do
+    begin
+        PrintLn("Checking ", L.href);
+    	Timeout(30000, GetURL(L.href))
+    end
+	?
+	begin
+		PrintLn(Text(L), " is dead");
+		NewNamedPiece("font", Content(L)).color := "red";
+	end
+end;
+
+Browser_ShowPage(Markup(P)); 

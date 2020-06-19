@@ -1,0 +1,16 @@
+//
+// Script to look up e-mail addresses on
+// the Yahoo People service.
+//
+
+import Str;
+
+var P = PostURL("http://people.yahoo.com/py/psSearch.py?Pyt=Tps&YY=2898",
+			[. FirstName="John", LastName="Smith".]);
+
+every a in Elem(P, "a") do
+	var m = Str_Match(a.href, "(?i)mailto:(.+)");
+	if m != nil then
+		PrintLn(m[1]);
+	end;
+end

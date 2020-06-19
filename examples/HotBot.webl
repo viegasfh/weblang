@@ -1,0 +1,15 @@
+//
+// Script to query the HotBot search engine
+// and print the first page of results.
+//
+
+var P = GetURL("http://www.hotbot.com/default.asp",
+			[. MT="java" .]);
+
+var H = Seq(P, "b br # br");
+every h in H do
+	var a = Elem(h[0], "a")[0];
+	PrintLn("Title: ", Text(a));
+	PrintLn("Abstract: ", Text(h[2]));
+	PrintLn();
+end;

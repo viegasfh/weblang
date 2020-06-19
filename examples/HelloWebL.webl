@@ -1,0 +1,11 @@
+//
+// This WebL program counts how many times the word "webl"
+// (in any capitalization) occurs in the WebL home page.
+// Note that the word "webl" also occurs in the page title,
+// which is not seen directly when viewing the page.
+//
+
+var P = GetURL("http://www.research.digital.com/SRC/WebL");
+var x = Size(Pat(P, "(?i)webl"));
+
+PrintLn("The word 'webl' occurs ", x, " times in the WebL home page.")

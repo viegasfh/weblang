@@ -1,0 +1,25 @@
+//
+// A demonstration web crawler that restricts its
+// crawl to a specific site.
+//
+
+import Str, WebCrawler;
+
+var MyCrawler = Clone(WebCrawler_Crawler,
+    [.
+        Visit = meth(s, page)
+            var title = Text(Elem(page, "title")[0]) ? "notitle";
+            PrintLn(page.URL, " title=", title);
+        end,
+
+        ShouldVisit = meth(s, url)
+            Str_StartsWith(url, `http://.*[.]yahoo[.]com`)
+            and
+            Str_EndsWith(url, "(/)|(.html?)")
+        end,
+    .]);
+
+MyCrawler.Start(3);                             // use 3 worker threads to crawl site
+MyCrawler.Enqueue("http://www.yahoo.com/");
+
+while !MyCrawler.farm.Idle() do Sleep(10000) end;

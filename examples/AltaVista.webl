@@ -1,0 +1,40 @@
+///
+// Script to query the AltaVista search engine
+// and print out the details of the first page
+// of results returned.
+// This script illustrates the use of sequence
+// pattern matching with the "Seq" function.
+//
+
+import Str;
+
+var QueryAltaVista = fun(query)
+	var results = [];
+
+	var P = GetURL("http://www.altavista.digital.com/cgi-bin/query",
+					[. pg="q", q=query .]);
+
+	var items = Elem(P, "dl");
+
+	// Extract the title, url, and abstract for each answer,
+	// and return a list of objects.
+	every i in items do
+		var a = Elem(i, "a")[0];
+		results = results + [
+				[.
+				title = Str_ToUpperCase(Text(a)),
+				href = a.href,
+				abstract = Str_Trim(Text(Children(Elem(i, "dd")[0])[0]))
+				.]
+			]
+	end;
+	results
+end;
+
+var R = QueryAltaVista("java");
+
+// Print out the results.
+every r in R do
+	PrintLn(r.title, " (", r.href, ")");
+	PrintLn("   ", r.abstract);
+end

@@ -1,0 +1,41 @@
+//
+// Script to sort Java books according to price at
+// Amazon.com.
+// Updated 10/5.
+//
+
+import Str;
+
+// Because Amazon generates frech URLs for each visit,
+// we first have to figure out the query URL by looking
+// at the keyword search form on their root page.
+var P = GetURL("http://www.amazon.com");
+var form = (Elem(P, "form") contain Pat(P, "(?i)search"))[0];
+P = PostURL(form.action, [. "keyword-query"="java", mode="books" .]);
+
+var
+	titles = Elem(P, "a") inside Elem(P, "dt"),
+	dd = Elem(P, "dd");
+
+var R = [];
+
+// Build a list of objects containing the title,
+// price and authors of the books found.
+var i = 0;
+while i < Size(titles) do
+	R = R + [
+		[.
+			title = Text(titles[i]),
+			price = ToReal(Pat(dd[i], `[$](\d+[.]\d+)`)[0][1]),
+			authors = Str_Trim(Text(Pat(dd[i], `^[^/]+`)[0]))
+		.] ];
+	i = i + 1
+end;
+
+// Sort according to price.
+R = Sort(R, fun(a, b) Sign(a.price - b.price) end);
+
+// Print everything.
+every r in R do
+	PrintLn("$", r.price, " ", r.title, ", by ", r.authors);
+end;

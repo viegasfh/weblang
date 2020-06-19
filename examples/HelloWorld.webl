@@ -1,0 +1,5 @@
+//
+// The obligatory "Hello world" program written in WebL.
+//
+
+PrintLn("Hello world");

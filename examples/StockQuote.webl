@@ -1,0 +1,22 @@
+//
+// Script to extract the stock price and volume
+// of Compaq from the Yahoo! Finance pages.
+//
+
+// Function to extract the contents of a particular (row, col) of a table.
+var PickCell = fun(page, table, row, col)
+    var rows = Elem(table, "tr");
+    var cols = (Elem(page, "th") + Elem(page, "td")) inside rows[row];
+    cols[col]
+end;
+
+// Get the quote page.
+var P = GetURL("http://quote.yahoo.com/q", [. s="cpq" .]);
+
+// Extract the table that contains the word "Symbol".
+// Also make sure we have the inner-most table.
+var table = Elem(P, "table") contain Pat(P, "Symbol");
+table = (table !contain table)[0];
+
+PrintLn("Price is ", Text(PickCell(P, table, 1, 2)));
+PrintLn("Volume is ", Text(PickCell(P, table, 1, 5)));

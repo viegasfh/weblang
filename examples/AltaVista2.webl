@@ -1,0 +1,40 @@
+//
+// Script to query the AltaVista search engine
+// and generate a new page containing the
+// results returned.
+// This script illustrates the use of sequence
+// pattern matching with the "Seq" function,
+// and the generation and modification of a new
+// page.
+//
+
+import Str, Browser;
+
+var Anchor = fun(text, url)
+	"<a href='" + url + "'>" + text + "</a>"
+end;
+
+var QueryAltaVista = fun(query)
+	var R = NewPage("<html><body><ol></ol></body></html>", "text/html");
+	var endpos = EndTag(Elem(R, "ol")[0]);
+
+	var P = GetURL("http://www.altavista.digital.com/cgi-bin/query",
+					[. pg="q", q=query .]);
+
+	var items = Elem(P, "dl");
+
+	// Extract the title, url, and abstract for each answer,
+	// and return a list of objects.
+	every i in items do
+		var
+			a = Elem(i, "a")[0],
+			txt = Str_Trim(Text(Children(Elem(i, "dd")[0])[0])),
+			url = a.href,
+			pce = NewHTMLPiece("<li>" + Anchor(txt, url) + "</li>\n");
+		InsertBefore(endpos, pce);
+	end;
+	R
+end;
+
+var R = QueryAltaVista("java");
+Browser_ShowPage(Markup(R));

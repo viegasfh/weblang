@@ -1,0 +1,51 @@
+/*
+Highlight proxy, by Tom Rodeheffer
+
+Running the code below, and contacting the host at:
+
+
+        http://www.myhost.com:9092/bin/highlight?url=X&word=Y
+
+
+where X is a URL and Y is a word, will highlight the occurrences of that
+word on the page. In addition, all further visited pages will have the
+word highlighed (ie script acts as a proxy).
+
+Note that this implementation does not understand HTML frames.
+*/
+
+import Url;
+import WebServer;
+
+var port = 9092;
+var where = "/bin/highlight";
+
+
+var Highlight = fun(req,res)
+  var url = req.param.url ? "http://www.compaq.com";
+  var word = req.param.word ? "Compaq";
+  var page = GetURL(url); // fetch the page
+
+
+  every w in Pat(page,word) !inside Elem(page,"title") do
+    var p = NewNamedPiece("font",w); // wrap a font element around it
+    p.size := "+1"; // define its size attribute
+    p.color := "red"; // define its color attribute
+  end;
+
+
+  every a in Elem(page,"a") do // for each anchor
+    a.href = where + // rewrite its href to be me
+             "?word=" + Url_Encode(word) + // word parameter
+             "&url=" + Url_Encode(a.href) // url parameter
+      ? nil; // but do nothing if no href
+  end;
+  res.result = Markup(page); // this is the result
+end;
+
+
+WebServer_Publish(where,Highlight); // associate url with function
+WebServer_Start("/dev/null",port); // disk pages root, server port
+
+PrintLn("Contact ", where, " on port ", port);
+Stall() // server task runs in background

@@ -1,0 +1,26 @@
+// Example to illustrates how to access the
+// Java APIs directly.
+
+import Java;
+
+var D = Java_New("java.util.Date");
+
+PrintLn("Today's date is ", D.toString());
+PrintLn("Today's month # is ", D.getMonth());
+
+
+PrintLn("Printing out Readme.txt with line numbers.\n");
+
+var System = Java_Class("java.lang.System");
+
+var F = Java_New("java.io.File", "Readme.txt");
+var R = Java_New("java.io.BufferedReader", Java_New("java.io.FileReader", F));
+
+var c = 1;
+var L = R.readLine();
+while L != nil do
+	System.out.print(c);
+	System.out.println(" " + L);
+	c = c + 1;
+	L = R.readLine();
+end;

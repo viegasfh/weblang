@@ -1,0 +1,55 @@
+//
+// Simple meta-search script to query AltaVista and HotBot
+// and combine the results.
+//
+
+import Str;
+
+var QueryAltaVista = fun(query)
+	var results = [];
+	var P = GetURL("http://www.altavista.digital.com/cgi-bin/query",
+					[. pg="q", q=query .]);
+
+	var items = Elem(P, "dl");
+
+	// Extract the title, url, and abstract for each answer,
+	// and return a list of objects.
+	every i in items do
+		var a = Elem(i, "a")[0];
+		results = results + [
+				[.
+				title = Text(a),
+				href = a.href,
+				abstract = Str_Trim(Text(Children(Elem(i, "dd")[0])[0]))
+				.]
+			]
+	end;
+	results
+end;
+
+var QueryHotBot = fun(query)
+    var results = [];
+    var P = GetURL("http://www.hotbot.com/default.asp",
+    			[. MT="java" .]);
+
+    var items = Seq(P, "b br # br");
+    every i in items do
+        var a = Elem(i[0], "a")[0];
+        results = results + [
+            [.
+    	        title = Text(a),
+    	        href = a.href,
+    	        abstract = Text(i[2])
+    	    .]]
+    end;
+    results
+end;
+
+var QueryAll = fun(query)
+	QueryAltaVista(query) + QueryHotBot(query)
+end;
+
+every r in QueryAll("java") do
+	PrintLn(ExpandCharEntities(r.title), " (", r.href, ")");
+	PrintLn("   ", ExpandCharEntities(r.abstract));
+end
