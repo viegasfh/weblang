@@ -1,9 +1,9 @@
 apply plugin: 'java'
 
-compileJava {
+/*compileJava {
   options.compilerArgs << "-Xlint:deprecation"
   options.compilerArgs << "-Xlint:unchecked"
-}
+}*/
 
 repositories {
   mavenCentral()
@@ -12,4 +12,6 @@ repositories {
 dependencies {
   compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
   compile group: 'net.imagej', name: 'ij', version: '1.48r'
+  compile group: 'com.apple', name: 'AppleJavaExtensions', version: '1.4'
+  compile group: 'mrj', name: 'MRJToolkitStubs', version: '1.0'
 }

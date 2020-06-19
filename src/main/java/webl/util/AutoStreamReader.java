@@ -29,10 +29,13 @@ public class AutoStreamReader extends Reader {
 	    ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
 	    int nRead = -1;
 
-	    // fill the buffer with all the bytes in the InputStream
-	    while ((nRead = in.read()) != -1) {
-	    	byteBuffer.wrie(nRead);
-	    }
+        try {
+            // fill the buffer with all the bytes in the InputStream
+            while ((nRead = in.read()) != -1) {
+                byteBuffer.write(nRead);
+            }
+        } catch (IOException ioe) {
+        }
 
 	    // now convert the buffer 
 	    // to a byte array

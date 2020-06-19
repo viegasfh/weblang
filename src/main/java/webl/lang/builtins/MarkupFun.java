@@ -18,7 +18,7 @@ public class MarkupFun extends AbstractFunExpr
         if (p instanceof Page) {
             return Program.Str(((Page)p).getMarkup());
         } else if (p instanceof Piece) {
-            return Program.Str(((Piece)p).page.getMarkup((Piece)p));;
+            return Program.Str(((Piece)p).page.getMarkup((Piece)p));
         } else
             throw new WebLException(c, callsite, "ArgumentError", toString() + " function expects a page or piece as first argument");
     }

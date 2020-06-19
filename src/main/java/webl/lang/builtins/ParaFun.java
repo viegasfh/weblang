@@ -20,7 +20,7 @@ public class ParaFun extends AbstractFunExpr
         if (p instanceof Page) {
             return ((Page)p).getPara(breaktags);
         } else if (p instanceof Piece) {
-            return ((Piece)p).page.getPara((Piece)p, breaktags);;
+            return ((Piece)p).page.getPara((Piece)p, breaktags);
         } else
             throw new WebLException(c, callsite, "ArgumentError", toString() + " function expects a page or piece as first argument");
     }

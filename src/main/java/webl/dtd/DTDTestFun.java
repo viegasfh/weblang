@@ -21,7 +21,7 @@ public class DTDTestFun extends AbstractFunExpr
         try {
             Reader R = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             DTDParser P = new DTDParser(R);
-            Timer T = new Timer();
+            webl.util.Timer T = new webl.util.Timer();
             T.Start();
             DTD dtd = P.Parse();
             T.Report("parse complete");

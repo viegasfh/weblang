@@ -56,7 +56,7 @@ abstract public class BasicThread extends Thread
             }
     }    
     
-    final public synchronized int getState() {
+    final public synchronized int getThreadState() {
         return state;
     }
     

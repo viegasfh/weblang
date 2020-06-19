@@ -4,7 +4,7 @@ import webl.lang.*;
 import webl.lang.expr.*;
 import webl.util.*;
 import java.util.*;
-import com.oroinc.text.regex.*;
+import java.util.regex.*;
 
 public class Piece extends ObjectExpr implements Cloneable
 {

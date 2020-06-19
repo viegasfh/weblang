@@ -1,6 +1,6 @@
 package webl.page;
 
-import com.oroinc.text.regex.*;
+import java.util.regex.*;
 import webl.lang.*;
 import webl.lang.expr.*;
 import webl.dtd.*;
@@ -210,8 +210,8 @@ public class Page extends ObjectExpr
 // In the first pass we just make copies of everything in p
         cia.begin();      //////////////////////
 
-        PriorityQueue begQ = new PriorityQueue();
-        PriorityQueue endQ = new PriorityQueue();
+        webl.util.PriorityQueue begQ = new webl.util.PriorityQueue();
+        webl.util.PriorityQueue endQ = new webl.util.PriorityQueue();
         Hashtable H = new Hashtable();
         ElemBuffer B = new ElemBuffer();
         Vector N = new Vector();
@@ -617,32 +617,34 @@ public class Page extends ObjectExpr
 
     static private Counter cpat = new Counter("Pat() searching");
 
-    synchronized final public PieceSet getPattern(String regexp) throws MalformedPatternException {
-        Perl5Compiler       compiler;
-        Perl5Matcher        matcher;
-        Perl5Pattern        pattern;
-        Perl5StreamInput    input;
-        MatchResult         result;
+    synchronized final public PieceSet getPattern(String regexp) throws PatternSyntaxException {
 
         Cleanup();                      // check if we need to do some page scrubbing
 
         cpat.begin();
 
-        compiler = new Perl5Compiler();
-        matcher  = new Perl5Matcher();
-
-        pattern = (Perl5Pattern)compiler.compile(regexp);
-        input = new Perl5StreamInput(new PageReader(this));
 
         PieceSet R = new PieceSet(this);
         Elem p = head.next;
         int pos = 0;
 
         try {
-            while (matcher.contains(input, pattern)) {
-                result = matcher.getMatch();
-                int beg = result.beginOffset(0);
-                int end = result.endOffset(0);
+            Pattern        pattern = Pattern.compile(regexp);
+            // get the PageReader into a Buffer
+            String pageStr = pageToString(new PageReader(this));
+            Matcher matcher  = pattern.matcher(pageStr);
+            MatchResult result = null;
+            // here we will try to find as many matches
+            // as we can in the whole page buffered into a string
+            // The Perl5StreamInput buffers the bytes read and keeps
+            // track of the position within the whole stream
+            // As a quick hack I converted the whole page into a 
+            // string. This way, we can keep track of the positions within
+            // the whole string
+            while (matcher.find()) {
+                result = matcher.toMatchResult();
+                int beg = result.start();
+                int end = result.end();
 
                 if (beg < end && beg >= pos) {
                     // Note: I added beg >= pos because OROMatch seems to have a bug that sometimes returns
@@ -669,7 +671,7 @@ public class Page extends ObjectExpr
                     np.setBeg(x); np.setEnd(y);
                     R.append(np);
 
-                    int groups = result.groups();
+                    int groups = result.groupCount();
                     for (int g = 0; g < groups; g++) {
                         String s = result.group(g);
                         if (s == null) s = "";
@@ -685,13 +687,7 @@ public class Page extends ObjectExpr
         return R;
     }
 
-    synchronized final public PieceSet getPattern(Piece piece, String regexp) throws MalformedPatternException, TypeCheckException {
-        Perl5Compiler       compiler;
-        Perl5Matcher        matcher;
-        Perl5Pattern        pattern;
-        Perl5StreamInput    input;
-        MatchResult         result;
-
+    synchronized final public PieceSet getPattern(Piece piece, String regexp) throws PatternSyntaxException, TypeCheckException {
         CheckCompatible(this, piece);
         PieceSet R = new PieceSet(this);
         if (piece.beg == piece.end)
@@ -712,18 +708,16 @@ public class Page extends ObjectExpr
         // now p = piece.beg, and p is a tag
         int skew = pos;
 
-        compiler = new Perl5Compiler();
-        matcher  = new Perl5Matcher();
-
-        pattern = (Perl5Pattern)compiler.compile(regexp);
-        input = new Perl5StreamInput(new PageReader(this, p, piece.end));
-
         try {
+            Pattern        pattern = Pattern.compile(regexp);
+            String pageStr = pageToString(new PageReader(this, p, piece.end));
+            Matcher        matcher = pattern.matcher(pageStr);
+            MatchResult         result = null;           
             outerloop:
-            while (p != piece.end && matcher.contains(input, pattern)) {
-                result = matcher.getMatch();
-                int beg = result.beginOffset(0) + skew;
-                int end = result.endOffset(0) + skew;
+            while (p != piece.end && matcher.find()) {
+                result = matcher.toMatchResult();
+                int beg = result.start() + skew;
+                int end = result.end() + skew;
                 if (beg < end && beg >= pos) {
                     // locate the begin position
                     while (p != head && (p instanceof Tag || beg >= pos + p.charwidth)) {
@@ -748,7 +742,7 @@ public class Page extends ObjectExpr
                     np.setBeg(x); np.setEnd(y);
                     R.append(np);
 
-                    int groups = result.groups();
+                    int groups = result.groupCount();
                     for (int g = 0; g < groups; g++) {
                         String s = result.group(g);
                         if (s == null) s = "";
@@ -1514,6 +1508,30 @@ public class Page extends ObjectExpr
             x = x.next;
         }
         return buf.toString();
+    }
+
+    // Converts a PageReader to a String, so that
+    // we can apply the regular expressions to the whole
+    // buffer and keep track of the positions within the 
+    // stream (or string in this case). This was a quick hack
+    // in converting the old Oro style Perl5StreamInput
+    // We could emulate the Perl5StreamInput with the reader,
+    // by keeping track of all the positions and continuing to 
+    // buffer it, but it is more work, and I just wanted 
+    // to get the code to work with Java 8. After having it
+    // to work on Java 8, I will refactor the code with more efficient
+    // and modern code constructs
+    private String pageToString(PageReader pageReader) throws IOException {
+        StringBuilder buffer = new StringBuilder(); 
+        try (BufferedReader bufferedReader = new BufferedReader(pageReader)) {
+           String line = null;
+
+           while ((line = bufferedReader.readLine()) != null) {
+             buffer.append(line);
+           }
+        }
+
+        return buffer.toString();
     }
 }
 

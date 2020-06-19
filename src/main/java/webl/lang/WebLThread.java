@@ -51,15 +51,15 @@ public class WebLThread extends BasicThread
                 BasicThread.Interrupt();
             }
             BasicThread.Check();                        // this thread might have been stopped
-            if (x0.getState() == SUCCESS) {
+            if (x0.getThreadState() == SUCCESS) {
                 x0.pleaseStop(); y0.pleaseStop();
                 return x0.getResult();
             }
-            if (y0.getState() == SUCCESS) {
+            if (y0.getThreadState() == SUCCESS) {
                 x0.pleaseStop(); y0.pleaseStop();
                 return y0.getResult();
             }
-            if (x0.getState() == FAILED && y0.getState() == FAILED) {
+            if (x0.getThreadState() == FAILED && y0.getThreadState() == FAILED) {
                 x0.pleaseStop(); y0.pleaseStop();
                 return x0.getResult();
             }
@@ -80,7 +80,7 @@ public class WebLThread extends BasicThread
         }
         
         BasicThread.Check();                // thread might have been stopped
-        if (x0.getState() == RUNNING) {
+        if (x0.getThreadState() == RUNNING) {
             x0.pleaseStop();
             throw new WebLException(c, callsite, "Timeout", "timeout");
         } else {
@@ -117,10 +117,10 @@ public class WebLThread extends BasicThread
             int successcount = 0;
             for(int i = 0; i < count; i++) {
                 WebLThread w = (WebLThread)W.elementAt(i);
-                if (w.getState() == FAILED) {
+                if (w.getThreadState() == FAILED) {
                     pleaseStop(W);
                     return w.getResult();
-                } else if (w.getState() == SUCCESS) {
+                } else if (w.getThreadState() == SUCCESS) {
                     successcount++;
                 }
             }
