@@ -5,17 +5,17 @@ import java.util.*;
 
 public class FileLocator
 {
-    private static Vector dirs = new Vector();
+    private static Vector<String> dirs = new Vector<String>();
     private static boolean loaded = false;
-    
+
     static private File FindFile(String name) {
         if (!loaded)
             LoadDirs();
-            
+
         File f = new File(name);
         if (f.canRead())
             return f;
-            
+
         if (dirs != null) {
             for (int i = 0; i < dirs.size(); i++) {
                 f = new File((String)dirs.elementAt(i), name);
@@ -29,9 +29,9 @@ public class FileLocator
     static public InputStream Find(String filename) {
         try {
             File f = FindFile(filename);
-            if (f != null) 
+            if (f != null)
                 return new FileInputStream(f);
-            else 
+            else
                 return Class.forName("webl.util.FileLocator")
                     .getResourceAsStream("/scripts/" + filename);
         } catch (FileNotFoundException e) {
@@ -40,7 +40,7 @@ public class FileLocator
             return null;
         }
     }
-    
+
     // lastmodified should be an array of length 1.
     static public InputStream Find(String filename, long[] lastmodified) {
         try {
@@ -49,7 +49,7 @@ public class FileLocator
             if (f != null) {
                 lastmodified[0] = f.lastModified();
                 return new FileInputStream(f);
-            } else 
+            } else
                 return Class.forName("webl.util.FileLocator")
                     .getResourceAsStream("/scripts/" + filename);
         } catch (FileNotFoundException e) {
@@ -58,12 +58,12 @@ public class FileLocator
             return null;
         }
     }
-    
+
     static public void ClearDirs(String path) {
-        dirs = new Vector();
+        dirs = new Vector<String>();
         loaded = false;
     }
-    
+
     static public void AddSearchDirs(String path) {
         StringTokenizer st = new StringTokenizer(path, System.getProperty("path.separator"), false);
         while (st.hasMoreTokens()) {
@@ -72,7 +72,7 @@ public class FileLocator
         }
         loaded = true;
     }
-    
+
     /* this is not a static initializer because the webl.properties file might not have been loaded yet */
     static void LoadDirs() {
         Properties p = System.getProperties();

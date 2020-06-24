@@ -13,14 +13,14 @@ public class NewFun extends AbstractFunExpr
     public Expr Apply(Context c, Vector args, Expr callsite) throws WebLException {
         if (args.size() < 1)
             throw new WebLException(c, callsite, "ArgumentError", toString() + " function expects 1 or more arguments");
-            
+
         String classname = StringArg(c, args, callsite, 0);
-        
+
         try {
             ClassDesc D = ClassDesc.Get(Class.forName(classname));
-            
+
             // Evaluate all the arguments
-            Vector R = new Vector();
+            Vector<Expr> R = new Vector<Expr>();
             for (int i = 1; i < args.size(); i++) {
                 Expr e = (Expr)(args.elementAt(i));
                 R.addElement(e.eval(c));

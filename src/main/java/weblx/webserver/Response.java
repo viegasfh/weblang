@@ -10,16 +10,16 @@ import java.io.*;
 public class Response extends ObjectExpr
 {
     private File file = null;
-    
+
     public Response(int statuscode, String msg) {
-        setStatus(statuscode, msg); 
+        setStatus(statuscode, msg);
         def("header", new ObjectExpr());
         def("result", Program.nilval);
         setHeader("Server", "WebL");
         setHeader("Content-Type", "text/html");
         setHeader("Date", new Date().toString());
     }
-    
+
     private String getStr(String key) {
         Expr v = get(key);
         if (v != null && v != Program.nilval)
@@ -27,38 +27,38 @@ public class Response extends ObjectExpr
         else
             return "";
     }
-        
+
     public void setStatus(int statuscode, String msg) {
         def("statuscode", Program.Int(statuscode));
         def("statusmsg", Program.Str(msg));
     }
-    
+
     public void setResult(String result) {
         file = null;
         def("result", Program.Str(result));
     }
-    
+
     public void setResult(File F) {
         this.file = F;
     }
-    
+
     public void setHeader(String name, String value) {
         ObjectExpr header = (ObjectExpr)get("header");
         header.def(name, Program.Str(value));
     }
-    
+
     /** Write the complete response, headers and all to the output stream */
     public void write(DataOutputStream out) throws IOException {
         out.writeBytes("HTTP/1.0 " + getStr("statuscode") + " " + getStr("statusmsg") + "\r\n");
-        
+
         if (file == null) {
             String result = getStr("result");
             if (result.equals("")) {
-                result = "<html><body><b>" + getStr("statuscode") + "</b> " 
+                result = "<html><body><b>" + getStr("statuscode") + "</b> "
                         + getStr("statusmsg") + "</body></html>";
             }
             setHeader("Content-Length", String.valueOf(result.length()));
-            
+
             writeHeaders(out);
             out.writeBytes("\r\n");
             out.writeBytes(result);
@@ -69,7 +69,7 @@ public class Response extends ObjectExpr
 
             writeHeaders(out);
             out.writeBytes("\r\n");
-                
+
             InputStream is = null;
             try {
                 is = new FileInputStream(file.getAbsolutePath());
@@ -108,23 +108,23 @@ public class Response extends ObjectExpr
             }
         }
     }
-    
+
     // Content type stuff
-    
-    static Hashtable map = new Hashtable();
-    
+
+    static Hashtable<String, String> map = new Hashtable<String, String>();
+
     String getContentType(File file) {
         String name = file.getName();
         int p = name.lastIndexOf('.');
-        Object typ = null;
-        if (p > 0) 
+        String typ = null;
+        if (p > 0)
             typ = map.get(name.substring(p));
         if (typ == null)
             return "content/unknown";
         else
-            return (String)typ;
+            return typ;
     }
-    
+
     static {
         map.put("", "content/unknown");
         map.put(".uu", "application/octet-stream");

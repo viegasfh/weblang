@@ -16,7 +16,7 @@ public class Machine
     public Scope        universeScope;
 
     /** Loaded modules, (string, module) pairs */
-    public Hashtable modules = new Hashtable();
+    public Hashtable<String, Module> modules = new Hashtable<String, Module>();
 
     private webl.util.Set modulesloading = new webl.util.Set();
 

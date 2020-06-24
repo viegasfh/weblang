@@ -12,9 +12,9 @@ public class ClassDesc
     public Hashtable           members = new Hashtable();
     public Constr[]            constructor;
 
-    static public Integer      Illegal = new Integer(42);
+    static public Integer      Illegal = Integer.valueOf(42);
 
-    static private Hashtable   cache = new Hashtable();
+    static private Hashtable<Class, ClassDesc>   cache = new Hashtable<Class, ClassDesc>();
 
     static public ClassDesc Get(Class clss) {
         synchronized(cache) {
@@ -56,7 +56,7 @@ public class ClassDesc
     }
 
     protected void LearnMethods(Class clss) {
-        Hashtable nhash = new Hashtable();
+        Hashtable<String, Vector<Method>> nhash = new Hashtable<String, Vector<Method>>();
 
         // Learn all the methods
         Method[] meth = clss.getMethods();
@@ -64,7 +64,7 @@ public class ClassDesc
             Method m = meth[i];
             String name = m.getName();
 
-            Vector V = (Vector)nhash.get(name);
+            Vector<Method> V = nhash.get(name);
             if (V == null) {
                 V = new Vector();
                 nhash.put(name, V);
@@ -72,10 +72,10 @@ public class ClassDesc
             V.addElement(m);
         }
 
-        Enumeration enumeration = nhash.keys();
+        Enumeration<String> enumeration = nhash.keys();
         while (enumeration.hasMoreElements()) {
-            String name = (String)enumeration.nextElement();
-            Vector V = (Vector)nhash.get(name);
+            String name = enumeration.nextElement();
+            Vector<Method> V = nhash.get(name);
             JavaMethExpr m = new JavaMethExpr(name, clss, V);
             members.put(Program.Str(name), m);
         }
@@ -234,14 +234,14 @@ public class ClassDesc
     static public Object Convert2Java(Expr e, Class c) {
         if (e instanceof BooleanExpr) {
             if (c == boolean.class)
-                return new Boolean(((BooleanExpr)e).val);
+                return Boolean.valueOf(((BooleanExpr)e).val);
             else
                 return Illegal;
         } else if (e instanceof NilExpr) {
             return null;
         } else if (e instanceof CharExpr) {
             if (c == char.class)
-                return new Character(((CharExpr)e).ch);
+                return Character.valueOf(((CharExpr)e).ch);
             else if (c == String.class) {
                 char ch = ((CharExpr)e).ch;
                 return String.valueOf(ch);
@@ -251,18 +251,18 @@ public class ClassDesc
             return ((StringExpr)e).val();
         } else if (e instanceof IntExpr) {
             long val = ((IntExpr)e).val;
-            if (c == int.class) return new Integer((int)val);
-            else if (c == long.class) return new Long(val);
-            else if (c == short.class) return new Short((short)val);
-            else if (c == byte.class) return new Byte((byte)val);
-            else if (c == float.class) return new Float((float)val);
-            else if (c == double.class) return new Double((double)val);
+            if (c == int.class) return Integer.valueOf((int)val);
+            else if (c == long.class) return Long.valueOf(val);
+            else if (c == short.class) return Short.valueOf((short)val);
+            else if (c == byte.class) return Byte.valueOf((byte)val);
+            else if (c == float.class) return Float.valueOf((float)val);
+            else if (c == double.class) return Double.valueOf((double)val);
             else
                 return Illegal;
         } else if (e instanceof RealExpr) {
             double val = ((RealExpr)e).val;
-            if (c == float.class) return new Float(val);
-            else if (c == double.class) return new Double(val);
+            if (c == float.class) return Double.valueOf(val).floatValue();
+            else if (c == double.class) return Double.valueOf(val);
             else
                 return Illegal;
         } else if (e instanceof JavaObjectExpr) {

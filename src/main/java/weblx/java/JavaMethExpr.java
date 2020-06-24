@@ -12,13 +12,13 @@ public class JavaMethExpr extends AbstractMethExpr
     public Vector   meth;
     public Vector   param = new Vector();
     public Vector   ret = new Vector();
-    
+
     public JavaMethExpr(String name, Class clss, Vector meth) {
         super(-1);
         this.name = name;
         this.clss = clss;
         this.meth = meth;
-        
+
         for(int i = 0; i < meth.size(); i++) {
             Method m = (Method)meth.elementAt(i);
             param.addElement(m.getParameterTypes());
@@ -28,7 +28,7 @@ public class JavaMethExpr extends AbstractMethExpr
 
     public Expr Apply(Context cc, Expr self, Vector arg, Expr callsite) throws WebLException {
         Object selfobj = null;
-        
+
         if (self instanceof JavaObjectExpr) {
             selfobj = ((JavaObjectExpr)self).obj;
             if (selfobj.getClass() != clss)
@@ -39,12 +39,12 @@ public class JavaMethExpr extends AbstractMethExpr
             throw new WebLException(cc, callsite, "NotAJavaObject", "method is not being applied against a Java object");
 
         // Evaluate all the arguments
-        Vector R = new Vector();
+        Vector<Expr> R = new Vector<Expr>();
         for (int i = 0; i < arg.size(); i++) {
             Expr e = (Expr)(arg.elementAt(i));
             R.addElement(e.eval(cc));
         }
-        
+
         int bestmethod = -1;
         int bestdistance = 1000;
         for(int i = 0; i < meth.size(); i++) {      // check out all methods
@@ -54,18 +54,18 @@ public class JavaMethExpr extends AbstractMethExpr
                 bestmethod = i;
             }
         }
-        
-        if (bestmethod == -1) 
+
+        if (bestmethod == -1)
             throw new WebLException(cc, callsite, "NoApplicableJavaMethod", "no java method was found that matched the actual arguments of " + toString());
         Method m = (Method)meth.elementAt(bestmethod);
-        
+
         Object[] margs = ClassDesc.Convert2Java(cc, callsite, R, (Class[])param.elementAt(bestmethod));
         try {
             Object result = m.invoke(selfobj, margs);
             if (result == null) return Program.nilval;
-                
-            Expr res = ClassDesc.Convert2WebL(result);            
-            if (res == null) 
+
+            Expr res = ClassDesc.Convert2WebL(result);
+            if (res == null)
                 throw new WebLException(cc, callsite, "ConversionError", "Could not convert return value of type " + result.getClass().getName() + " to a WebL type");
             return res;
         } catch (InvocationTargetException e) {
@@ -75,7 +75,7 @@ public class JavaMethExpr extends AbstractMethExpr
             throw new WebLException(cc, callsite, "IllegalAccessError", "Illegal access exception");
         }
     }
-    
+
     public String toString() {
         StringBuffer s = new StringBuffer();
         s.append("<");
@@ -96,5 +96,5 @@ public class JavaMethExpr extends AbstractMethExpr
         s.append(">");
         return s.toString();
     }
-    
+
 }

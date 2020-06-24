@@ -1,9 +1,9 @@
 apply plugin: 'java'
 
-/*compileJava {
+compileJava {
   options.compilerArgs << "-Xlint:deprecation"
   options.compilerArgs << "-Xlint:unchecked"
-}*/
+}
 
 repositories {
   mavenCentral()
