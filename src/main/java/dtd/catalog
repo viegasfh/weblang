@@ -2,6 +2,9 @@ PUBLIC "-//W3C//ENTITIES Symbols//EN//HTML" HTMLsym.ent
 PUBLIC "-//W3C//ENTITIES Latin1//EN//HTML" ISOlat1.ent
 PUBLIC "-//W3C//ENTITIES Special//EN//HTML" HTMLmisc.ent
 PUBLIC "ISO 8879-1986//ENTITIES Added Latin 1//EN//HTML" ISOlat1.ent
+PUBLIC "-//W3C//ENTITIES Latin 1 for XHTML//EN" xhtml-lat1.ent
+PUBLIC "-//W3C//ENTITIES Symbols for XHTML//EN" xhtml-symbol.ent
+PUBLIC "-//W3C//ENTITIES Special for XHTML//EN" xhtml-special.ent
 
 PUBLIC "-//W3C//DTD HTML 4.0//EN" HTML4.dtd
 PUBLIC "-//W3C//DTD HTML 4.0 Draft//EN" HTML4.dtd
@@ -26,3 +29,5 @@ PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 2//EN" html-s.dtd
 
 PUBLIC "-//IETF//DTD HTML Strict Level 1//EN" html-1s.dtd
 PUBLIC "-//IETF//DTD HTML 2.0 Strict Level 1//EN" html-1s.dtd
+
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"s xhtml1-transitional.dtd
