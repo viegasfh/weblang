@@ -671,7 +671,7 @@ public class Page extends ObjectExpr
                     np.setBeg(x); np.setEnd(y);
                     R.append(np);
 
-                    int groups = result.groupCount();
+                    int groups = result.groupCount() + 1;
                     for (int g = 0; g < groups; g++) {
                         String s = result.group(g);
                         if (s == null) s = "";
@@ -742,7 +742,7 @@ public class Page extends ObjectExpr
                     np.setBeg(x); np.setEnd(y);
                     R.append(np);
 
-                    int groups = result.groupCount();
+                    int groups = result.groupCount() + 1;
                     for (int g = 0; g < groups; g++) {
                         String s = result.group(g);
                         if (s == null) s = "";

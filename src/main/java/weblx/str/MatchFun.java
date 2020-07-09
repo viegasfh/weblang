@@ -29,7 +29,7 @@ public class MatchFun extends AbstractFunExpr
         if (matcher.find()) {
             ObjectExpr obj = new ObjectExpr();
             
-            int groups = matcher.groupCount();
+            int groups = matcher.groupCount() + 1;
             
             for(int group = 0; group < groups; group++) {
                 String g = matcher.group(group);
