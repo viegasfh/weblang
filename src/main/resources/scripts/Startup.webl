@@ -19,6 +19,7 @@ var Clone = Native("webl.lang.builtins.CloneFun");
 var Content = Native("webl.lang.builtins.ContentFun");
 var Delete = Native("webl.lang.builtins.DeleteFun");
 var Elem = Native("webl.lang.builtins.ElemFun");
+var HasAttr = Native("webl.lang.builtins.HasAttrFun");
 var EndTag = Native("webl.lang.builtins.EndFun");
 var Error = Native("webl.lang.builtins.ErrorFun");
 var ErrorLn = Native("webl.lang.builtins.ErrorlnFun");
