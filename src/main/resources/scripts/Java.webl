@@ -10,7 +10,7 @@ arguments.
 export var New = Native("weblx.java.NewFun");
 
 /*
-Java_New(classname: string): object
+Java_Class(classname: string): object
 Maps the Java class to a WebL object, so that static members of the class can be accessed.
 */
 export var Class = Native("weblx.java.ClassFun");

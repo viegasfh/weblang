@@ -11,6 +11,7 @@ export var
     ToUpperCase = Native("weblx.str.ToUpperCaseFun"),
 
     Trim = Native("weblx.str.TrimFun"),
+    Clean = Native("weblx.str.CleanFun"),
     Replace = Native("weblx.str.ReplaceFun"),
     Compare = Native("weblx.str.CompareFun"),
     EqualsIgnoreCase = Native("weblx.str.EqualsIgnoreCaseFun"),
