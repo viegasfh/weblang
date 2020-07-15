@@ -6,6 +6,7 @@ export var
 
     StartsWith = Native("weblx.str.StartsWithFun"),
     EndsWith = Native("weblx.str.EndsWithFun"),
+    Contains = Native("weblx.str.ContainsFun"),
 
     ToLowerCase = Native("weblx.str.ToLowerCaseFun"),
     ToUpperCase = Native("weblx.str.ToUpperCaseFun"),
@@ -13,6 +14,8 @@ export var
     Trim = Native("weblx.str.TrimFun"),
     Clean = Native("weblx.str.CleanFun"),
     Replace = Native("weblx.str.ReplaceFun"),
+    ReplaceAll = Native("weblx.str.ReplaceAllFun"),
+    ReplaceFirst = Native("weblx.str.ReplaceFirstFun"),
     Compare = Native("weblx.str.CompareFun"),
     EqualsIgnoreCase = Native("weblx.str.EqualsIgnoreCaseFun"),
     IndexOf = Native("weblx.str.IndexOfFun"),

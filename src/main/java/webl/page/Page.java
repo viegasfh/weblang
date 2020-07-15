@@ -102,6 +102,18 @@ public class Page extends ObjectExpr
         return PieceSet.OpElem(pieces, name);
     }
 
+    // all pieces with class c
+    synchronized final public PieceSet getElemByClass(String c) {
+        Cleanup();                                  // check if we need to do some page scrubbing
+        return PieceSet.OpElemByClass(pieces, c);
+    }
+
+    // Get the single element by Id from the whole page
+    synchronized final public Piece getElemById(String pieceId) {
+        Cleanup();                                  // check if we need to do some page scrubbing
+        return PieceSet.OpElemById(pieces, pieceId);
+    }
+
     // get all the pieces of the page
     synchronized final public PieceSet getElem() {
         return pieces.OpClone();
@@ -112,6 +124,12 @@ public class Page extends ObjectExpr
     synchronized final public PieceSet getElem(Piece p, String name) throws TypeCheckException {  // all the pieces in p named name
         CheckCompatible(this, p);
         return PieceSet.OpSelect(pieces, p, name);
+    }
+
+    // all the pieces in p with a specific name
+    synchronized final public PieceSet getElemByClass(Piece p, String c) throws TypeCheckException {  // all the pieces in p with class c
+        CheckCompatible(this, p);
+        return PieceSet.OpSelectByClass(pieces, p, c);
     }
 
     // all the pieces in p

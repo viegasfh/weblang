@@ -4,6 +4,7 @@ import webl.lang.*;
 import webl.lang.expr.*;
 import webl.util.*;
 import java.util.*;
+import java.util.regex.*;
 
 public class PieceSet extends ValueExpr implements ContentEnumeration
 {
@@ -156,7 +157,54 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         }
         return R;
     }
-    
+
+    public static PieceSet OpElemByClass(PieceSet x, String c) {
+        PieceSet R = new PieceSet(x.page);
+        String[] classes = c.split(" ");
+        Cell p = x.head.next;
+        boolean contains = true;
+        Pattern pattern = null;
+        Matcher matcher = null;
+
+        while (p != x.head) {
+            String attr = p.pce.getAttr("class");
+
+            if (attr != null) {
+                for (int i = 0; i < classes.length; i++) {
+                    pattern = Pattern.compile("\\b" + classes[i] + "\\b");
+                    matcher = pattern.matcher(attr);
+
+                    if (matcher.find()) {
+                        contains &= true;
+                    }
+                    else {
+                        contains &= false;
+                    }
+                }
+            } else
+                contains = false;
+
+            if (contains)
+              R.append(p.pce);
+            
+            p = p.next;
+            contains = true;
+        }
+        return R;
+    }
+
+    // gets an element by id from the entire page
+    public static Piece OpElemById(PieceSet x, String pieceId) {
+        PieceSet R = new PieceSet(x.page);
+        Cell p = x.head.next;
+        while (p != x.head) {
+            if (p.pce.getAttr("id") != null && p.pce.getAttr("id").equals(pieceId)) 
+              return p.pce;
+            p = p.next;
+        }
+        return null;
+    }   
+
     public PieceSet OpClone() {
         PieceSet R = new PieceSet(this.page);
         Cell p = this.head.next;
@@ -666,7 +714,47 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         }
         return R;
     }
-    
+
+    // all the pieces with class c from x that are contained in p
+    public static PieceSet OpSelectByClass(PieceSet x, Piece p, String c) {
+        PieceSet R = new PieceSet(x.page);
+        String[] classes = c.split(" ");
+
+        Cell cell = x.head.next;
+        boolean contains = true;
+
+        Pattern pattern = null;
+        Matcher matcher = null;
+
+        while (cell != x.head) {
+            if (Piece.contain(p, cell.pce)) {
+                String attr = cell.pce.getAttr("class");
+                if (attr != null) {
+                    int i = 0;
+                    for (i = 0; i < classes.length; i++) {
+                        pattern = Pattern.compile("\\b" + classes[i] + "\\b");
+                        matcher = pattern.matcher(attr);
+
+                        if (matcher.find()) {
+                            contains &= true;
+                        } else {
+                            contains &= false;
+                        }
+                    }
+                } else
+                    contains = false;
+                
+                
+                if (contains)
+                    R.append(cell.pce);
+            }
+
+            contains = true;
+            cell = cell.next;
+        }
+        return R;
+    }
+
     // all the pieces from x that are contained in p
     public static PieceSet OpSelect(PieceSet x, Piece p) {
         PieceSet R = new PieceSet(x.page);
