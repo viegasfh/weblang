@@ -171,7 +171,10 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
 
             if (attr != null) {
                 for (int i = 0; i < classes.length; i++) {
-                    pattern = Pattern.compile("\\b" + classes[i] + "\\b");
+                    StringBuffer patternString = new StringBuffer("(^" + classes[i] + "$)|([ ]");
+                    patternString.append(classes[i] + "[ ])|([ ]" + classes[i]);
+                    patternString.append("$)|(^" + classes[i] + "[ ])");
+                    pattern = Pattern.compile(patternString.toString());
                     matcher = pattern.matcher(attr);
 
                     if (matcher.find()) {
@@ -732,7 +735,10 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
                 if (attr != null) {
                     int i = 0;
                     for (i = 0; i < classes.length; i++) {
-                        pattern = Pattern.compile("\\b" + classes[i] + "\\b");
+                        StringBuffer patternString = new StringBuffer("(^" + classes[i] + "$)|([ ]");
+                        patternString.append(classes[i] + "[ ])|([ ]" + classes[i]);
+                        patternString.append("$)|(^" + classes[i] + "[ ])");
+                        pattern = Pattern.compile(patternString.toString());
                         matcher = pattern.matcher(attr);
 
                         if (matcher.find()) {

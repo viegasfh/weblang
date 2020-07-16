@@ -1,5 +1,0 @@
-var elements;
-var page;
-page=GetURL("http://bartleby-nbt.blogspot.com/");
-elements=ElemByClass(page, "mainblogsec section");
-Size(elements)
