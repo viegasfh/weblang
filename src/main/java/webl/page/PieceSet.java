@@ -157,7 +157,15 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         }
         return R;
     }
-
+    public static Piece OpFirstElem(PieceSet x, String name) {
+        Cell p = x.head.next;
+        while (p != x.head) {
+            if (p.pce.name.equals(name)) 
+              return p.pce;
+            p = p.next;
+        }
+        return null;
+    }
     public static PieceSet OpElemByClass(PieceSet x, String c) {
         PieceSet R = new PieceSet(x.page);
         String[] classes = c.split(" ");
@@ -198,7 +206,6 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
 
     // gets an element by id from the entire page
     public static Piece OpElemById(PieceSet x, String pieceId) {
-        PieceSet R = new PieceSet(x.page);
         Cell p = x.head.next;
         while (p != x.head) {
             if (p.pce.getAttr("id") != null && p.pce.getAttr("id").equals(pieceId)) 
@@ -716,6 +723,17 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
             c = c.next;
         }
         return R;
+    }
+
+    // the first piece named name from x that are contained in p
+    public static Piece OpSelectFirst(PieceSet x, Piece p, String name) {
+        Cell c = x.head.next;
+        while (c != x.head) {
+            if (Piece.contain(p, c.pce) && c.pce.name.equals(name)) 
+                return c.pce;
+            c = c.next;
+        }
+        return null;
     }
 
     // all the pieces with class c from x that are contained in p

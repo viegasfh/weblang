@@ -21,6 +21,7 @@ var Delete = Native("webl.lang.builtins.DeleteFun");
 var Elem = Native("webl.lang.builtins.ElemFun");
 var ElemById = Native("webl.lang.builtins.ElemByIdFun");
 var ElemByClass = Native("webl.lang.builtins.ElemByClassFun");
+var FirstElem = Native("webl.lang.builtins.FirstElemFun");
 var HasAttr = Native("webl.lang.builtins.HasAttrFun");
 var EndTag = Native("webl.lang.builtins.EndFun");
 var Error = Native("webl.lang.builtins.ErrorFun");

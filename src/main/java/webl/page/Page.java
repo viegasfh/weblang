@@ -102,6 +102,11 @@ public class Page extends ObjectExpr
         return PieceSet.OpElem(pieces, name);
     }
 
+    synchronized final public Piece getFirstElem(String name) {
+        Cleanup();                                  // check if we need to do some page scrubbing
+        return PieceSet.OpFirstElem(pieces, name);
+    }
+
     // all pieces with class c
     synchronized final public PieceSet getElemByClass(String c) {
         Cleanup();                                  // check if we need to do some page scrubbing
@@ -124,6 +129,12 @@ public class Page extends ObjectExpr
     synchronized final public PieceSet getElem(Piece p, String name) throws TypeCheckException {  // all the pieces in p named name
         CheckCompatible(this, p);
         return PieceSet.OpSelect(pieces, p, name);
+    }
+
+    // the first piece in p with a specific name
+    synchronized final public Piece getFirstElem(Piece p, String name) throws TypeCheckException {  // the first piece in p named name
+        CheckCompatible(this, p);
+        return PieceSet.OpSelectFirst(pieces, p, name);
     }
 
     // all the pieces in p with a specific name
