@@ -12,7 +12,7 @@ public class XMLParser implements ParserInterface
 {
     private BufReader   R;
     private Page        page;
-    private Vector      stck = new Vector();
+    private Vector<Piece>      stck = new Vector<Piece>();
     
     private String      documenturl;
     
@@ -268,7 +268,7 @@ public class XMLParser implements ParserInterface
     
     void ProcessCloseTag(String name) {
         for(int i = stck.size()-1; i >= 0; i--) {
-            Piece p = (Piece)stck.elementAt(i);
+            Piece p = stck.elementAt(i);
             if(p.name.equals(name)) {
                 page.appendCloseTag(p);
                 stck.removeElement(p);
@@ -300,7 +300,7 @@ public class XMLParser implements ParserInterface
     
     void ProcessFin() {
         for(int i = stck.size()-1; i >= 0; i--) {
-            Piece p = (Piece)stck.elementAt(i);
+            Piece p = stck.elementAt(i);
             ProcessError(R.getLine(), "closing tag " + p.name);
             page.appendCloseTag(p);
         }

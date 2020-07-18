@@ -10,7 +10,7 @@ import java.io.*;
 
 public class Page extends ObjectExpr
 {
-    public static final int  HTML = 1, XML = 2;
+    public static final int  HTML = 1, XML = 2, JSON = 3;
     public int          format;         // format of the page, XML or HTML
     public DTD          dtd;            // the DTD (if any)
 

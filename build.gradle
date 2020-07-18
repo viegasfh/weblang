@@ -1,9 +1,21 @@
 apply plugin: 'java'
 
+task copyLexerResources(type: Copy) {
+    from(file("src/main/java/com/geekstakulus/json/lexer/lexer.dat"))
+    into(file("$buildDir/classes/java/main/com/geekstakulus/json/lexer"))
+}
+
+task copyParserResources(type: Copy) {
+    from(file("src/main/java/com/geekstakulus/json/parser/parser.dat"))
+    into(file("$buildDir/classes/java/main/com/geekstakulus/json/parser"))
+}
+
 compileJava {
   options.compilerArgs << "-Xlint:deprecation"
   options.compilerArgs << "-Xlint:unchecked"
 }
+
+jar.dependsOn  copyLexerResources, copyParserResources
 
 repositories {
   mavenCentral()

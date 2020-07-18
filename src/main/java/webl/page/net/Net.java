@@ -6,6 +6,7 @@ import webl.page.*;
 import webl.page.html.*;
 import webl.page.xml.*;
 import webl.page.plain.*;
+import webl.page.json.*;
 
 import webl.util.*;
 import java.util.*;
@@ -213,6 +214,8 @@ public class Net
             return new XMLParser();    
         } else if (mimetype.equals("application/xml")) {
             return new XMLParser();    
+        } else if (mimetype.equals("application/json")) {
+            return new JSONParser();
         } else
             throw new NetException(400, "Unsupported mime type " + M.toString());
     }

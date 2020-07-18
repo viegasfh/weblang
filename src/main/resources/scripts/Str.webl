@@ -16,6 +16,7 @@ export var
     Replace = Native("weblx.str.ReplaceFun"),
     ReplaceAll = Native("weblx.str.ReplaceAllFun"),
     ReplaceFirst = Native("weblx.str.ReplaceFirstFun"),
+    Duplicate = Native("weblx.str.DuplicateFun"),
     Compare = Native("weblx.str.CompareFun"),
     EqualsIgnoreCase = Native("weblx.str.EqualsIgnoreCaseFun"),
     IndexOf = Native("weblx.str.IndexOfFun"),
