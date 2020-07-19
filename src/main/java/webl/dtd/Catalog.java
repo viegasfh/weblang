@@ -6,8 +6,8 @@ import webl.util.*;
 
 public class Catalog
 {
-    static Hashtable dtdcache = new Hashtable();
-    static Hashtable cat = new Hashtable();     // map DTD name to filenames
+    static Hashtable<String, DTD> dtdcache = new Hashtable<String, DTD>();
+    static Hashtable<String, String> cat = new Hashtable<String, String>();     // map DTD name to filenames
     
     static protected String findDTD(String dtdname) throws IOException, FileNotFoundException {
         Object fn = cat.get(dtdname);

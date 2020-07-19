@@ -8,7 +8,7 @@ public class DTDElement
     String name;
     boolean optopen, optclose;
     webl.util.Set children, exclusions, inclusions;
-    Hashtable attrs = new Hashtable();
+    Hashtable<String, DTDAttribute> attrs = new Hashtable<String, DTDAttribute>();
 
     public DTDElement(String name, boolean optopen, boolean optclose, webl.util.Set children,
             webl.util.Set exclusions, webl.util.Set inclusions) {
@@ -29,9 +29,9 @@ public class DTDElement
     }
 
     public DTDAttribute getAttribute(String name) {
-        Object obj = attrs.get(name);
+        DTDAttribute obj = attrs.get(name);
         if (obj != null)
-            return (DTDAttribute)obj;
+            return obj;
         else
             return null;
     }

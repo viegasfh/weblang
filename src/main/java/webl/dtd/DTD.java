@@ -6,39 +6,39 @@ import webl.util.Log;
 
 public class DTD
 {
-    private Hashtable charentities   = new Hashtable();
-    private Hashtable macroentities  = new Hashtable();
-    private Hashtable elements       = new Hashtable();
+    private Hashtable<String, String> charentities   = new Hashtable<String, String>();
+    private Hashtable<String, String> macroentities  = new Hashtable<String, String>();
+    private Hashtable<String, DTDElement> elements       = new Hashtable<String, DTDElement>();
 
     public DTD () {
     }
 
     public DTDElement getElement(String name) {
-        Object o = elements.get(name);
-        if (o != null)
-            return (DTDElement)o;
+        DTDElement element = elements.get(name);
+        if (element != null)
+            return element;
         else
             return null;
     }
 
     public void addElement(DTDElement e) {
         // only add an element if it does not exist already (SGML spec)
-        Object o = elements.get(e.getName());
-        if (o == null) {
+        DTDElement element = elements.get(e.getName());
+        if (element == null) {
             elements.put(e.getName(), e);
         }
     }
 
     public void addCharEntity(String name, String value) {
-        Object o = charentities.get(name);
-        if (o == null)
+        String entity = charentities.get(name);
+        if (entity == null)
             charentities.put(name, value);
     }
 
     public void addMacroEntity(String name, String value) {
         name = name.toLowerCase();
-        Object o = macroentities.get(name);
-        if (o == null)
+        String macroEntity = macroentities.get(name);
+        if (macroEntity == null)
             macroentities.put(name, value);
     }
 

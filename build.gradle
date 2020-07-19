@@ -26,4 +26,5 @@ dependencies {
   compile group: 'net.imagej', name: 'ij', version: '1.48r'
   compile group: 'com.apple', name: 'AppleJavaExtensions', version: '1.4'
   compile group: 'mrj', name: 'MRJToolkitStubs', version: '1.0'
+  compile group: 'org.glassfish', name: 'jsonp-jaxrs', version: '1.1.2'
 }
