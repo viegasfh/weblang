@@ -85,31 +85,67 @@ public class Piece extends ObjectExpr implements Cloneable
     
     public void writeOpenTag(StringBuffer buf) {    
         if (name != null) {
-            buf.append("<").append(name);
-            
-            Enumeration e = EnumKeys();
-            while(e.hasMoreElements()) {
-                Expr n = (Expr)e.nextElement();
-                Expr val = (Expr)get(n);
-                if (!(val instanceof AbstractMethExpr)) {   // methods are not attributes
-                    buf.append(" ").append(n.print());
-                    if (page.format == Page.XML || !EmptyAttr(val)) {
-                        buf.append("=\"");
-                        appendAttrVal(buf, val.print());
+            if (page.format == Page.JSON) {
+                String type = getAttr("type");
+
+                if (name.equals("json")) {
+                    if (type.equals("array")) {
+                        buf.append("[");
+                    } else if (type.equals("object")) {
+                        buf.append("{");
+                    } else if (type.equals("string")) {
+                        buf.append("\"");
+                    }
+                } else {
+                    Piece parent = Parent();
+                    if (parent != null && !parent.getAttr("type").equals("array"))
+                        buf.append("\"" + name + "\": ");
+                    if (type.equals("array")) {
+                        buf.append("[");
+                    } else if (type.equals("object")) {
+                        buf.append("{");
+                    } else if (type.equals("string")) {
                         buf.append("\"");
                     }
                 }
+            } else {
+                buf.append("<").append(name);
+                
+                Enumeration e = EnumKeys();
+                while(e.hasMoreElements()) {
+                    Expr n = (Expr)e.nextElement();
+                    Expr val = (Expr)get(n);
+                    if (!(val instanceof AbstractMethExpr)) {   // methods are not attributes
+                        buf.append(" ").append(n.print());
+                        if (page.format == Page.XML || !EmptyAttr(val)) {
+                            buf.append("=\"");
+                            appendAttrVal(buf, val.print());
+                            buf.append("\"");
+                        }
+                    }
+                }
+                if (end == beg && page.format == Page.XML)
+                    buf.append("/>");
+                else
+                    buf.append(">"); 
             }
-            if (end == beg && page.format == Page.XML)
-                buf.append("/>");
-            else
-                buf.append(">");           
         }
     }
     
     public void writeCloseTag(StringBuffer buf) {    
         if (name != null) {
-            buf.append("</").append(name).append(">");
+            if (page.format == Page.JSON) {
+                String type = getAttr("type");
+                if (type.equals("array")) {
+                    buf.append("]");
+                } else if (type.equals("object")) {
+                    buf.append("}");
+                } else if (type.equals("string")) {
+                    buf.append("\"");
+                }
+            } else {
+                buf.append("</").append(name).append(">");
+            }
         }
     }
     

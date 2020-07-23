@@ -431,16 +431,31 @@ public class Page extends ObjectExpr
         StringBuffer buf = new StringBuffer();
 
         Elem x = beg;
+        Piece lastPiece = null;
+
         while(true) {
             if (x instanceof Str)
                 buf.append(((Str)x).getPCData());
             else {
                 Piece owner = ((Tag)x).getOwner();
-                if (owner != null) {                        // only use named pieces
-                    if (owner.beg == x)
+                if (owner != null) {
+                    if (owner.beg == x) {
+                        if (this.format == JSON) {
+                            Piece parent = owner.Parent();
+                            if (parent != null && (parent.getAttr("type").equals("object") ||
+                                parent.getAttr("type").equals("array")) && lastPiece != null && Piece.cafter(owner, lastPiece)) {
+
+                                    buf.append(", ");
+                            }
+                        }
+
                         owner.writeOpenTag(buf);
-                    else if (owner.end == x)
+                    }
+                    else if (owner.end == x) {
                         owner.writeCloseTag(buf);
+                    }
+
+                    lastPiece = owner;
                 }
             }
             if (x == end) break;
@@ -566,7 +581,7 @@ public class Page extends ObjectExpr
 
 
     void indent(StringBuffer buf, int lev) {
-        while (lev-- > 0) buf.append("    ");
+        while (lev-- > 0) buf.append("  ");
     }
 
     void blockprint(StringBuffer buf, int lev, String s) {
@@ -599,6 +614,13 @@ public class Page extends ObjectExpr
     }
 
     synchronized final public String getPrettyMarkup(Elem beg, Elem end) {
+        if (this.format == JSON)
+            return getPrettyJSON(beg, end);
+
+        return getPrettyXML(beg, end);
+    }
+
+    String getPrettyXML(Elem beg, Elem end) {
         String eol = System.getProperty("line.separator");
         StringBuffer buf = new StringBuffer();
         int prenesting = 0;
@@ -628,6 +650,55 @@ public class Page extends ObjectExpr
                         buf.append(eol);
                         if (owner.name.equalsIgnoreCase("pre")) prenesting--;
                     }
+                }
+            }
+            if (x == end) break;
+            x = x.next;
+        }
+        return buf.toString();
+    }
+
+    String getPrettyJSON(Elem beg, Elem end) {
+        String eol = System.getProperty("line.separator");
+        StringBuffer buf = new StringBuffer();
+
+        int lev = 0;
+
+        Piece lastPiece = null;
+
+        Elem x = beg;
+        while(true) {
+            if (x instanceof Str) {
+                buf.append(((Str)x).getPCData());
+            } else {
+                Piece owner = ((Tag)x).getOwner();
+                if (owner != null) {                        // only use named pieces
+                    if (owner.beg == x) {
+                        Piece parent = owner.Parent();
+
+                        if (parent != null && (parent.getAttr("type").equals("object") || parent.getAttr("type").equals("array")) && lastPiece != null && Piece.cafter(owner, lastPiece)) { 
+                            buf.append(", ");
+                            buf.append(eol);
+                        }
+                        indent(buf, lev);
+                        owner.writeOpenTag(buf);
+                        if (owner.getAttr("type").equals("array") ||owner.getAttr("type").equals("object")) {
+                            buf.append(eol);
+                        }
+                        if (owner.end != x) lev++;
+                    } else if (owner.end == x) {
+                        lev--;
+                        String type = owner.getAttr("type");
+                        if (type.equals("string") || type.equals("number") || 
+                            type.equals("boolean") || type.equals("undefined")) {
+                                owner.writeCloseTag(buf);
+                        } else {
+                            buf.append(eol);
+                            indent(buf, lev);
+                            owner.writeCloseTag(buf);
+                        }
+                    }
+                    lastPiece = owner;
                 }
             }
             if (x == end) break;

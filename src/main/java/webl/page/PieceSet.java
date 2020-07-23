@@ -166,6 +166,7 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         }
         return null;
     }
+
     public static PieceSet OpElemByClass(PieceSet x, String c) {
         PieceSet R = new PieceSet(x.page);
         String[] classes = c.split(" ");
