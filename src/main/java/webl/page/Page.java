@@ -119,6 +119,18 @@ public class Page extends ObjectExpr
         return PieceSet.OpElemById(pieces, pieceId);
     }
 
+    // all pieces with piece pieceName, attribute attr and value val
+    synchronized final public PieceSet getElemByAttr(String pieceName, String attr, String val) {
+        Cleanup();                                  // check if we need to do some page scrubbing
+        return PieceSet.OpElemByAttr(pieces, pieceName, attr, val);
+    }
+
+    // all pieces with attribute attr and value val
+    synchronized final public PieceSet getElemByAttr(String attr, String val) {
+        Cleanup();                                  // check if we need to do some page scrubbing
+        return PieceSet.OpElemByAttr(pieces, attr, val);
+    }
+
     // get all the pieces of the page
     synchronized final public PieceSet getElem() {
         return pieces.OpClone();
@@ -141,6 +153,18 @@ public class Page extends ObjectExpr
     synchronized final public PieceSet getElemByClass(Piece p, String c) throws TypeCheckException {  // all the pieces in p with class c
         CheckCompatible(this, p);
         return PieceSet.OpSelectByClass(pieces, p, c);
+    }
+
+    // all the pieces in p with a specific attribute value and element name
+    synchronized final public PieceSet getElemByAttr(Piece p, String pieceName, String attr, String val) throws TypeCheckException {  // all the pieces in p with class c
+        CheckCompatible(this, p);
+        return PieceSet.OpSelectByAttr(pieces, p, pieceName, attr, val);
+    }
+
+    // all the pieces in p with a specific attribute value
+    synchronized final public PieceSet getElemByAttr(Piece p, String attr, String val) throws TypeCheckException {  // all the pieces in p with class c
+        CheckCompatible(this, p);
+        return PieceSet.OpSelectByAttr(pieces, p, attr, val);
     }
 
     // all the pieces in p

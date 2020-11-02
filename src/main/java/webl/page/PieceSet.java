@@ -216,6 +216,33 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         return null;
     }   
 
+    // gets an element by attr with value val from the entire page
+    public static PieceSet OpElemByAttr(PieceSet x, String pieceName, String attr, String val) {
+        PieceSet R = new PieceSet(x.page);
+        Cell p = x.head.next;
+        while (p != x.head) {
+            if (p.pce.name.equals(pieceName)) {
+                if (p.pce.getAttr(attr) != null && p.pce.getAttr(attr).equals(val)) 
+                    R.append(p.pce);
+            }
+
+            p = p.next;
+        }
+        return R;
+    } 
+
+    // gets an element by attr with value val from the entire page
+    public static PieceSet OpElemByAttr(PieceSet x, String attr, String val) {
+        PieceSet R = new PieceSet(x.page);
+        Cell p = x.head.next;
+        while (p != x.head) {
+            if (p.pce.getAttr(attr) != null && p.pce.getAttr(attr).equals(val)) 
+                R.append(p.pce);
+            p = p.next;
+        }
+        return R;
+    } 
+
     public PieceSet OpClone() {
         PieceSet R = new PieceSet(this.page);
         Cell p = this.head.next;
@@ -721,6 +748,34 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         Cell c = x.head.next;
         while (c != x.head) {
             if (Piece.contain(p, c.pce) && c.pce.name.equals(name)) R.append(c.pce);
+            c = c.next;
+        }
+        return R;
+    }
+
+    // all the pieces named name from x that are contained in p
+    public static PieceSet OpSelectByAttr(PieceSet x, Piece p, String pieceName, String attr, String val) {
+        PieceSet R = new PieceSet(x.page);
+        
+        Cell c = x.head.next;
+        while (c != x.head) {
+            if (Piece.contain(p, c.pce) && c.pce.name.equals(pieceName)) {
+                if (c.pce.getAttr(attr) != null && c.pce.getAttr(attr).equals(val))
+                    R.append(c.pce);
+            } 
+            c = c.next;
+        }
+        return R;
+    }
+
+    // all the pieces from x that are contained in p
+    public static PieceSet OpSelectByAttr(PieceSet x, Piece p, String attr, String val) {
+        PieceSet R = new PieceSet(x.page);
+        
+        Cell c = x.head.next;
+        while (c != x.head) {
+            if (Piece.contain(p, c.pce) && c.pce.getAttr(attr) != null && c.pce.getAttr(attr).equals(val))
+                R.append(c.pce);
             c = c.next;
         }
         return R;
