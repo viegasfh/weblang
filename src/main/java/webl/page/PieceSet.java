@@ -172,21 +172,13 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         String[] classes = c.split(" ");
         Cell p = x.head.next;
         boolean contains = true;
-        Pattern pattern = null;
-        Matcher matcher = null;
 
         while (p != x.head) {
             String attr = p.pce.getAttr("class");
 
             if (attr != null) {
                 for (int i = 0; i < classes.length; i++) {
-                    StringBuffer patternString = new StringBuffer("(^" + classes[i] + "$)|([ ]");
-                    patternString.append(classes[i] + "[ ])|([ ]" + classes[i]);
-                    patternString.append("$)|(^" + classes[i] + "[ ])");
-                    pattern = Pattern.compile(patternString.toString());
-                    matcher = pattern.matcher(attr);
-
-                    if (matcher.find()) {
+                    if (attr.contains(classes[i])) {
                         contains &= true;
                     }
                     else {
@@ -800,22 +792,13 @@ public class PieceSet extends ValueExpr implements ContentEnumeration
         Cell cell = x.head.next;
         boolean contains = true;
 
-        Pattern pattern = null;
-        Matcher matcher = null;
-
         while (cell != x.head) {
             if (Piece.contain(p, cell.pce)) {
                 String attr = cell.pce.getAttr("class");
                 if (attr != null) {
                     int i = 0;
                     for (i = 0; i < classes.length; i++) {
-                        StringBuffer patternString = new StringBuffer("(^" + classes[i] + "$)|([ ]");
-                        patternString.append(classes[i] + "[ ])|([ ]" + classes[i]);
-                        patternString.append("$)|(^" + classes[i] + "[ ])");
-                        pattern = Pattern.compile(patternString.toString());
-                        matcher = pattern.matcher(attr);
-
-                        if (matcher.find()) {
+                        if (attr.contains(classes[i])) {
                             contains &= true;
                         } else {
                             contains &= false;
